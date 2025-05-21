@@ -73,13 +73,14 @@ $DataFim = $_POST['DataFim'];
       12 => 'DEZEMBRO'
     ];
 
-    $mesesAnoAtual = range(1, date('n'));
+    //$mesesAnoAtual = range(1, date('n'));
 
     // Função para formatar em reais
     function formatarMoeda($valor)
     {
       return 'R$ ' . number_format((float) $valor, 2, ',', '.');
     }
+
     $meses = [];
     $perc0a30 = [];
     $perc0a90 = [];
@@ -94,10 +95,6 @@ $DataFim = $_POST['DataFim'];
       $data = strtotime($DataIni);
 
       $anoSelecionado = date('Y',  $data);
-
-      if ($contMes < date('n')) {
-        $contMes++;
-      }
 
       $aberto30 = (float) $row['PERIODO0A30_TITULO'];
       $aberto90 = (float) $row['PERIODO0A90_TITULO'];
@@ -124,12 +121,9 @@ $DataFim = $_POST['DataFim'];
       $totalPercTab = (float) ($perc0a30Tab + $perc0a90Tab + $perc0a365Tab + $percallTab);
 
       /* Variaveis do grafico */
-      if (date('Y') == $anoSelecionado) {
-        $meses[] = isset($nomesMeses[$contMes]) ? $nomesMeses[$contMes] : 'MÊS ' . $contMes;
-
-      } else {
-        $meses[] = isset($nomesMeses[$mes]) ? $nomesMeses[$mes] : 'MÊS ' . $mes;
-      }
+      
+      $meses[] = isset($nomesMeses[$mes]) ? $nomesMeses[$mes] : 'MÊS ' . $mes;
+    
 
       $perc0a30[] = floatval($row['PERC0A30']);
       $perc0a90[] = floatval($row['PERC0A90']);
@@ -185,7 +179,7 @@ $DataFim = $_POST['DataFim'];
   <!-- Dados JS embutidos -->
   <script>
     const chartData = {
-      labels: <?= json_encode(array_unique($meses)) ?>,
+      labels: <?= json_encode($meses) ?>,
       datasets: {
         perc0a30: <?= json_encode($perc0a30) ?>,
         perc0a90: <?= json_encode($perc0a90) ?>,
