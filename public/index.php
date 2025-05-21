@@ -34,6 +34,7 @@ $DataFim = $_POST['DataFim'];
     <?php
     $sql = "SELECT 
                 MES,
+                ANO,
                 PERIODO0A30_TITULO,
                 PERIODO0A90_TITULO,
                 PERIODO0A365_TITULO,
@@ -90,11 +91,12 @@ $DataFim = $_POST['DataFim'];
 
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
       $mes = (int) $row['MES'];
+      $ano = (int) $row['ANO'];
       $mesNome = isset($nomesMeses[$mes]) ? $nomesMeses[$mes] : 'MÊS ' . $mes;
 
       $data = strtotime($DataIni);
 
-      $anoSelecionado = date('Y',  $data);
+      $anoSelecionado = $ano;
 
       $aberto30 = (float) $row['PERIODO0A30_TITULO'];
       $aberto90 = (float) $row['PERIODO0A90_TITULO'];
