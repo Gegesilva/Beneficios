@@ -124,7 +124,7 @@ $DataFim = $_POST['DataFim'];
 
       /* Variaveis do grafico */
       
-      $meses[] = isset($nomesMeses[$mes]) ? $nomesMeses[$mes] : 'MÊS ' . $mes;
+      $meses[] = isset($nomesMeses[$mes]) ? $nomesMeses[$mes].' '.$ano : 'MÊS ' . $mes;
     
 
       $perc0a30[] = floatval($row['PERC0A30']);
@@ -135,7 +135,7 @@ $DataFim = $_POST['DataFim'];
 
 
       $tabela .= "<div class='month-card'>";
-      $tabela .= "<div class='month-title1'>{$mesNome}</div>";
+      $tabela .= "<div class='month-title1'>{$mesNome} $ano</div>";
       $tabela .= "<table>";
       $tabela .= "<thead><tr><th>Períodos</th><th>Contas a receber</th><th>Valor Recebido</th><th>Inadimplência</th><th>Índice</th></tr></thead>";
       $tabela .= "<tbody>";
