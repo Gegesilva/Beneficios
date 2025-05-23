@@ -23,7 +23,7 @@ $DataFim = $_POST['DataFim'];
     <div>
       <form method="POST">
         <label for="year">Periodo: </label>
-        <input type="date" class="filtro" name="DataIni" value="<?= htmlspecialchars($DataIni) ?>">
+        <input type="date" class="filtro" name="DataIni" onchange="this.form.submit()" value="<?= htmlspecialchars($DataIni) ?>">
         <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()" value="<?= htmlspecialchars($DataFim) ?>">
       </form>
     </div>
