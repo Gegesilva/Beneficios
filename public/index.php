@@ -164,9 +164,9 @@ if (empty($DataIni) && empty($DataFim)) {
             $tabela .= "<td>$row[CLIENTE]</td>";
             $tabela .= "<td>$row[GRUPO_ECONOMICO]</td>";
             $tabela .= "<td>" . formatarMoeda($valorInicial) . "</td>";
-            $tabela .= "<td>" . formatarMoeda($valorConcedido) . "</td>";
-            $tabela .= "<td>" . formatarMoeda($valorUtilizado) . "</td>";
-            $tabela .= "<td>" . formatarMoeda($valorExpirado) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$row[CODCLI]', '$DataIni', '$DataFim', 'C')\">" . formatarMoeda($valorConcedido) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$row[CODCLI]', '$DataIni', '$DataFim', 'U')\">" . formatarMoeda($valorUtilizado) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$row[CODCLI]', '$DataIni', '$DataFim', 'E')\">" . formatarMoeda($valorExpirado) . "</td>";
             $tabela .= "<td>" . formatarMoeda($valorfinal) . "</td>";
             $tabela .= "<td></td>";
             $tabela .= "</tr>";
@@ -189,10 +189,11 @@ if (empty($DataIni) && empty($DataFim)) {
   <script src="JS/script.js" charset="utf-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <form id="detalForm" method="POST" action="../app/views/detal.php" style="display: none;">
-    <input type="hidden" name="cliente" id="formAno">
-    <input type="hidden" name="mes" id="formMes">
-    <input type="hidden" name="tipoValor" id="formTipoValor">
+  <form id="detalForm" method="get" action="../app/views/detal.php" style="display: none;">
+    <input type="hidden" name="cliente" id="cliente">
+    <input type="hidden" name="dataIni" id="dataIni">
+    <input type="hidden" name="dataFim" id="dataFim">
+    <input type="hidden" name="tipoValor" id="tipoValor">
   </form>
 
 </body>
