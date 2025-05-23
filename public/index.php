@@ -5,6 +5,18 @@ include "../Config/database.php";
 include "../app/models/models.php";
 $DataIni = $_POST['DataIni'];
 $DataFim = $_POST['DataFim'];
+
+if (empty($DataIni) && empty($DataFim)) {
+  $DataIni = date('Y-01-01');
+  $DataFim = date('Y-m-t');
+} else {
+  if (empty($DataIni)) {
+    $DataIni = date('Y-01-01');
+  }
+  if (empty($DataFim)) {
+    $DataFim = date('Y-m-t');
+  }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
