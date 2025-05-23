@@ -39,6 +39,7 @@ if (empty($DataIni) && empty($DataFim)) {
         <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()" value="<?= htmlspecialchars($DataFim) ?>">
       </form>
     </div>
+    
   </div>
 
   <div class="month-grid">
