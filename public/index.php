@@ -3,6 +3,10 @@ header('Content-type: text/html; charset=ISO-8895-1');
 include "../Config/config.php";
 include "../Config/database.php";
 include "../app/models/models.php";
+ini_set('max_input_vars', 3000);
+error_reporting(0); // Desativa a exibição de todos os tipos de erros
+ini_set('display_errors', '0'); // Garante que erros não sejam exibidos no navegador
+
 $DataIni = $_POST['DataIni'];
 $DataFim = $_POST['DataFim'];
 
@@ -24,8 +28,9 @@ if (empty($DataIni) && empty($DataFim)) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="../public/CSS/index.css">
-  <title>TINSEI</title>
+  <title>DATABIT</title>
 </head>
 
 <body>
@@ -35,183 +40,159 @@ if (empty($DataIni) && empty($DataFim)) {
     <div>
       <form method="POST">
         <label for="year">Periodo: </label>
-        <input type="date" class="filtro" name="DataIni" onchange="this.form.submit()" value="<?= htmlspecialchars($DataIni) ?>">
-        <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()" value="<?= htmlspecialchars($DataFim) ?>">
+        <input type="date" class="filtro" name="DataIni" onchange="this.form.submit()"
+          value="<?= htmlspecialchars($DataIni) ?>">
+        <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()"
+          value="<?= htmlspecialchars($DataFim) ?>">
       </form>
     </div>
-    
+
   </div>
 
   <div class="month-grid">
+    <div class="month-card">
+      <table>
+        <thead>
+          <tr>
+            <th class="titulo-col-tab" onclick="ordenarTabela(0)">Clente <i class="fa fa-sort" aria-hidden="true"></i>
+            </th>
+            <th class="titulo-col-tab" onclick="ordenarTabela(1)">Grupo <i class="fa fa-sort" aria-hidden="true"></i>
+            </th>
+            <th class="titulo-col-tab" onclick="ordenarTabela(2)">Valor Inicial <i class="fa fa-sort"
+                aria-hidden="true"></i></th>
+            <th class="titulo-col-tab" onclick="ordenarTabela(3)">Valor concedido <i class="fa fa-sort"
+                aria-hidden="true"></i></th>
+            <th class="titulo-col-tab" onclick="ordenarTabela(4)">Valor Utilizado <i class="fa fa-sort"
+                aria-hidden="true"></i></th>
+            <th class="titulo-col-tab" onclick="ordenarTabela(5)">Valor Expirado <i class="fa fa-sort"
+                aria-hidden="true"></i></th>
+            <th class="titulo-col-tab" onclick="ordenarTabela(6)">Valor Final <i class="fa fa-sort" aria-hidden="true"></i>
+            </th>
+            <th>
+              <button class="btn-xls-detal" onclick="exportarExcel()"></button>
+            </th>
+          </tr>
+        </thead>
+        <?php
+        $sql = "WITH Concedido AS (
+                              SELECT 
+                                  TB02278_CODCLI AS CODCLI,
+                                  TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
+                                  A.TB01008_NOME AS CLIENTE,
+                                  ISNULL(TB02091_DATANOTA, TB02278_DATA) AS DATA,
+                                  SUM(TB02278_VLRBENEF) AS VALOR_CONCEDIDO
+                              FROM VW02310
+                              LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278_CODCLI
+                              LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                              LEFT JOIN TB02021 ON TB02021_CODIGO = TB02278_NUMVENDA
+                              LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021_NTFISC
+                              GROUP BY TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, ISNULL(TB02091_DATANOTA, TB02278_DATA)
+                          ),
+                          Utilizado AS (
+                              SELECT 
+                                  TB02278.TB02278_CODCLI AS CODCLI,
+                                  TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
+                                  A.TB01008_NOME AS CLIENTE,
+                                  TB02091_DATA AS DATA,
+                                  SUM(VLRDESCBENEF) AS VALOR_UTILIZADO
+                              FROM VW02311
+                              LEFT JOIN TB02278 ON TB02278_CODIGO = BENEFICIO
+                              LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278.TB02278_CODCLI
+                              LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                              LEFT JOIN TB01074 ON TB01074_CODIGO = TB02278_CLASSIFICACAO
+                              LEFT JOIN TB02091 ON TB02091_NTFISC = NTFISC AND TB02091_CODEMP = CODEMP
+                              GROUP BY TB02278.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02091_DATA
+                          ),
+                          Expirado AS (
+                              SELECT 
+                                  vw02310.TB02278_CODCLI AS CODCLI,
+                                  TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
+                                  A.TB01008_NOME AS CLIENTE,
+                                  ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA) AS DATA,
+                                  SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO
+                              FROM VW02310
+                              LEFT JOIN TB02278 AS B ON B.TB02278_CODIGO = vw02310.TB02278_CODIGO
+                              LEFT JOIN TB01008 AS A ON TB01008_CODIGO = vw02310.TB02278_CODCLI
+                              LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                              LEFT JOIN TB02021 ON TB02021_CODIGO = vw02310.TB02278_NUMVENDA
+                              LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021.TB02021_NTFISC
+                              WHERE vw02310.TB02278_SITUACAO = 'I'
+                              GROUP BY vw02310.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA)
+                          )
 
-    <?php
-    $sql = "SELECT 
-                MES,
-                ANO,
-                PERIODO0A30_TITULO,
-                PERIODO0A90_TITULO,
-                PERIODO0A365_TITULO,
-				        PERIODOALL_TITULO,
+                          SELECT 
+                              COALESCE(c.CODCLI, u.CODCLI, e.CODCLI) AS CODCLI,
+                              COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO, e.GRUPO_ECONOMICO) AS GRUPO_ECONOMICO,
+                              COALESCE(c.CLIENTE, u.CLIENTE, e.CLIENTE) AS CLIENTE,
+                              COALESCE(c.DATA, u.DATA, e.DATA) AS DATA,
+                              0 AS VALOR_INICIAL, 
+                              ISNULL(c.VALOR_CONCEDIDO, 0) AS VALOR_CONCEDIDO,
+                              ISNULL(u.VALOR_UTILIZADO, 0) AS VALOR_UTILIZADO,
+                              ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_EXPIRADO,
+                              0 + ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_FINAL
+                          FROM Concedido c
+                          FULL JOIN Utilizado u  ON c.CODCLI = u.CODCLI AND c.GRUPO_ECONOMICO = u.GRUPO_ECONOMICO AND c.DATA = u.DATA
+                          FULL JOIN Expirado e ON COALESCE(c.CODCLI, u.CODCLI) = e.CODCLI 
+                              AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
+                              AND COALESCE(c.DATA, u.DATA) = e.DATA
 
-                PERIODO0A30_PAGO,
-                PERIODO0A90_PAGO,
-                PERIODO0A365_PAGO,
-				        PERIODOALL_PAGO,
+                          WHERE CAST(c.DATA AS DATE) BETWEEN '$DataIni' AND '$DataFim'
 
-                INAD0A30,
-                INAD0A90,
-                INAD0A365,
-                INADALL,
+                  ";
 
-                PERC0A30,
-                PERC0A90,
-                PERC0A365,
-                PERCALL
-            FROM FTVENCIDO_PERIODO('$DataIni', '$DataFim')";
+        $stmt = sqlsrv_prepare($conn, $sql,[]);
+        sqlsrv_execute($stmt);
+        ?>
+        <tbody>
+          <?php
+          function formatarMoeda($valor)
+          {
+            return 'R$ ' . number_format((float) $valor, 2, ',', '.');
+          }
+         
+          $tabela = "";
 
-    $stmt = sqlsrv_query($conn, $sql);
-    $tabela = "";
-
-    $nomesMeses = [
-      1 => 'JANEIRO',
-      2 => 'FEVEREIRO',
-      3 => 'MARÇO',
-      4 => 'ABRIL',
-      5 => 'MAIO',
-      6 => 'JUNHO',
-      7 => 'JULHO',
-      8 => 'AGOSTO',
-      9 => 'SETEMBRO',
-      10 => 'OUTUBRO',
-      11 => 'NOVEMBRO',
-      12 => 'DEZEMBRO'
-    ];
-
-    //$mesesAnoAtual = range(1, date('n'));
-
-    // Função para formatar em reais
-    function formatarMoeda($valor)
-    {
-      return 'R$ ' . number_format((float) $valor, 2, ',', '.');
-    }
-
-    $meses = [];
-    $perc0a30 = [];
-    $perc0a90 = [];
-    $perc0a365 = [];
-    $percall = [];
-    $contMes = 0;
-
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-      $mes = (int) $row['MES'];
-      $ano = (int) $row['ANO'];
-      $mesNome = isset($nomesMeses[$mes]) ? $nomesMeses[$mes] : 'MÊS ' . $mes;
-
-      $data = strtotime($DataIni);
-
-      $anoSelecionado = $ano;
-
-      $aberto30 = (float) $row['PERIODO0A30_TITULO'];
-      $aberto90 = (float) $row['PERIODO0A90_TITULO'];
-      $aberto365 = (float) $row['PERIODO0A365_TITULO'];
-      $abertoAll = (float) $row['PERIODOALL_TITULO'];
-      $totalAberto = $aberto30 + $aberto90 + $aberto365 + $abertoAll;
-
-      $pago30 = (float) $row['PERIODO0A30_PAGO'];
-      $pago90 = (float) $row['PERIODO0A90_PAGO'];
-      $pago365 = (float) $row['PERIODO0A365_PAGO'];
-      $pagoAll = (float) $row['PERIODOALL_PAGO'];
-      $totalPago = $pago30 + $pago90 + $pago365 + $pagoAll;
-
-      $inad30 = (float) $row['INAD0A30'];
-      $inad90 = (float) $row['INAD0A90'];
-      $inad365 = (float) $row['INAD0A365'];
-      $inadAll = (float) $row['INADALL'];
-      $inadTotal = $inad30 + $inad90 + $inad365 + $inadAll;
-
-      $perc0a30Tab = (float) $row['PERC0A30'];
-      $perc0a90Tab = (float) $row['PERC0A90'];
-      $perc0a365Tab = (float) $row['PERC0A365'];
-      $percallTab = (float) $row['PERCALL'];
-      $totalPercTab = (float) ($perc0a30Tab + $perc0a90Tab + $perc0a365Tab + $percallTab);
-
-      /* Variaveis do grafico */
-      
-      $meses[] = isset($nomesMeses[$mes]) ? $nomesMeses[$mes].' '.$ano : 'MÊS ' . $mes;
-    
-
-      $perc0a30[] = floatval($row['PERC0A30']);
-      $perc0a90[] = floatval($row['PERC0A90']);
-      $perc0a365[] = floatval($row['PERC0A365']);
-      $percall[] = floatval($row['PERCALL']);
+          while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $valorInicial = (float) $row['VALOR_INICIAL'];
+            $valorConcedido = (float) $row['VALOR_CONCEDIDO'];
+            $valorUtilizado = (float) $row['VALOR_UTILIZADO'];
+            $valorExpirado = (float) $row['VALOR_EXPIRADO'];
+            $valorfinal = (float) $row['VALOR_FINAL'];
 
 
+            $tabela .= "<tr>";
+            $tabela .= "<td>$row[CLIENTE]</td>";
+            $tabela .= "<td>$row[GRUPO_ECONOMICO]</td>";
+            $tabela .= "<td>" . formatarMoeda($valorInicial) . "</td>";
+            $tabela .= "<td>" . formatarMoeda($valorConcedido) . "</td>";
+            $tabela .= "<td>" . formatarMoeda($valorUtilizado) . "</td>";
+            $tabela .= "<td>" . formatarMoeda($valorExpirado) . "</td>";
+            $tabela .= "<td>" . formatarMoeda($valorfinal) . "</td>";
+            $tabela .= "<td></td>";
+            $tabela .= "</tr>";
+          }
+          print ($tabela);
+          ?>
 
-      $tabela .= "<div class='month-card'>";
-      $tabela .= "<div class='month-title1'>{$mesNome} $ano</div>";
-      $tabela .= "<table>";
-      $tabela .= "<thead><tr><th>Períodos</th><th>Contas a receber</th><th>Valor Recebido</th><th>Inadimplência</th><th>Índice</th></tr></thead>";
-      $tabela .= "<tbody>";
-
-      $tabela .= "<tr>";
-      $tabela .= "<td>0 a 30 dias</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a30', '1')\">" . formatarMoeda($aberto30) . "</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a30', '2')\">" . formatarMoeda($pago30) . "</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a30', '3')\">" . formatarMoeda($inad30) . "</td>
-                  <td> %" . $perc0a30Tab . "</td></tr>";
-
-      $tabela .= "<tr>";
-      $tabela .= "<td>0 a 90 dias</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a90', '1')\">" . formatarMoeda($aberto90) . "</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a90', '2')\">" . formatarMoeda($pago90) . "</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a90', '3')\">" . formatarMoeda($inad90) . "</td>
-                  <td> %" . $perc0a90Tab . "</td></tr>";
-
-      $tabela .= "<tr>";
-      $tabela .= "<td>0 a 365 dias</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a365', '1')\">" . formatarMoeda($aberto365) . "</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a365', '2')\">" . formatarMoeda($pago365) . "</td>
-                  <td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$anoSelecionado', '$mes', '0a365', '3')\">" . formatarMoeda($inad365) . "</td>
-                  <td> %" . $perc0a365Tab . "</td></tr>";
-
-      $tabela .= "<tr class='total-row'>";
-      $tabela .= "<td>Global</td><td>" . formatarMoeda($abertoAll) . "</td><td>" . formatarMoeda($pagoAll) . "</td><td>" . formatarMoeda($inadAll) . "</td><td> %" . $percallTab . "</td></tr>";
-
-      /* $tabela .= "<tr class='total-row'><td>Total</td><td>" . formatarMoeda($totalAberto) . "</td><td>" . formatarMoeda($totalPago) . "</td><td>" . formatarMoeda($inadTotal) . "</td><td> %" .$totalPercTab . "</td></tr>"; */
-      $tabela .= "</tbody></table></div>";
-    }
-
-    echo $tabela;
-    ?>
-  </div>
-  <!-- Gráfico -->
-  <div class="grafico">
-    <div class="chart-container">
-      <canvas id="lineChart"></canvas>
+        </tbody>
+        <!-- <tfoot>
+          <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
+            <th colspan="8" style="text-align: right;">Totais:</th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+        </tfoot> -->
+      </table>
     </div>
-  </div>
-
-  <!-- Dados JS embutidos -->
-  <script>
-    const chartData = {
-      labels: <?= json_encode($meses) ?>,
-      datasets: {
-        perc0a30: <?= json_encode($perc0a30) ?>,
-        perc0a90: <?= json_encode($perc0a90) ?>,
-        perc0a365: <?= json_encode($perc0a365) ?>,
-        percall: <?= json_encode($percall) ?>
-      }
-    };
-  </script>
   </div>
   <script src="JS/script.js" charset="utf-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <form id="detalForm" method="POST" action="../app/views/detal.php" style="display: none;">
-    <input type="hidden" name="ano" id="formAno">
+    <input type="hidden" name="cliente" id="formAno">
     <input type="hidden" name="mes" id="formMes">
     <input type="hidden" name="tipoValor" id="formTipoValor">
-    <input type="hidden" name="periodo" id="formPeriodo">
   </form>
 
 </body>

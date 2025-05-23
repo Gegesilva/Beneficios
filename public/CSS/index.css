@@ -5,6 +5,8 @@ body {
   padding: 20px;
 }
 
+
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -35,21 +37,20 @@ img{
   width: 50,2px;
 }
 
+
 .month-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(650px, 1fr));
-  gap: 24px; /* espaçamento entre os cards */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
 }
 
 .month-card {
-  background-color: #e3f3e5;
-  border-left: 5px solid #2e7d32;
-  padding: 16px;
+  background: #e9f1e7;
+  border-left: 5px solid darkgreen;
+  padding: 10px;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-  min-width: 650px;
-  white-space: nowrap;
-  overflow: hidden; /* evita barras */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  font-size: 10px;
 }
 
 .month-title {
@@ -58,71 +59,104 @@ img{
   font-size: 1.1rem;
 }
 
+.table-wrapper {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-  table-layout: auto;
+  font-size: 10px;
 }
 
-th, td {
+th,
+td {
+  padding: 4px;
   text-align: left;
-  padding: 8px 12px;
-  white-space: nowrap; /* impede quebra de linha */
 }
 
 th {
+  position: sticky;
+  top: 0;
   background-color: #c8e6c9;
-  font-weight: bold;
+  z-index: 1;
+}
+.titulo-col-tab {
+  cursor: pointer;
 }
 
-tr.total-row {
-  font-weight: bold;
-  border-top: 2px solid #333;
+.btn-voltar-detal {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 0;
+  background-image: url('../img/voltar.png');
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 10px;
 }
 
-@media (max-width: 700px) {
+.btn-xls-detal {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 0;
+  background-image: url('../img/excel.png');
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+.btn-voltar-detal:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-xls-detal:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* RESPONSIVIDADE PARA TELAS PEQUENAS */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
   .month-grid {
     grid-template-columns: 1fr;
   }
 
   .month-card {
-    min-width: 100%;
+    font-size: 12px;
   }
 
-  table, th, td {
-    font-size: 0.8rem;
+  table {
+    font-size: 12px;
   }
-}
 
-.linha-click{
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border-radius: 10px;
-}
-
-.linha-click:hover{
-  transform: scale(1.1) translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  font-weight: bold;
-  color: red;
-}
-
-
-/* grafico */
-.chart-container {
-  max-width: 90%;
-  margin: 2rem auto;
-  aspect-ratio: 4 / 1; /* Largura 3x a altura (ajustável) */
-  position: relative;
-}
-
-canvas {
-  width: 100% !important;
-  height: 100% !important;
-  background-color: white;
-  border-radius: 10px;
+  .btn-voltar-detal {
+    width: 24px;
+    height: 24px;
+  }
 }
