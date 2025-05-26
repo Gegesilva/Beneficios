@@ -176,3 +176,10 @@ th {
   font-weight: bold;
   color: red;
 }
+
+.linha-click2:hover{
+  transform: scale(1.0) translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  font-weight: bold;
+  color: rgb(31, 1, 1);
+}

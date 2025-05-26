@@ -160,7 +160,7 @@ if (empty($DataIni) && empty($DataFim)) {
             $valorfinal = (float) $row['VALOR_FINAL'];
 
 
-            $tabela .= "<tr>";
+            $tabela .= "<tr class='linha-click2'>";
             $tabela .= "<td>$row[CLIENTE]</td>";
             $tabela .= "<td>$row[GRUPO_ECONOMICO]</td>";
             $tabela .= "<td>" . formatarMoeda($valorInicial) . "</td>";
