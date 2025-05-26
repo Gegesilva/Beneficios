@@ -58,7 +58,6 @@ if (empty($DataIni) && empty($DataFim)) {
     </div>
   </div>
 
-
   </div>
 
   <div class="month-grid">
