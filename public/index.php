@@ -47,7 +47,7 @@ if (empty($DataIni) && empty($DataFim)) {
     <div class="filtros">
       <form method="POST">
         <label for="year">Data: </label>
-        <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()"
+        <input type="date" class="filtro" min="<?= date('Y') . '-01-01' ?>" name="DataFim" onchange="this.form.submit()"
           value="<?= htmlspecialchars($DataFim) ?>">
 
         <label for="filtroCliente">Cliente: </label>
