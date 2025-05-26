@@ -5,25 +5,52 @@ include "../../Config/database.php";
 
 
 $cliente = (string) $_POST["cliente"];
-$dataIni = $_POST["dataIni"];
-$dataFim = $_POST["dataFim"];
-$tipoValor = (STRING) $_POST["tipoValor"];
+$dataIni = date('Y-m-d', strtotime($_POST["dataIni"]));
+$dataFim = date('Y-m-d', strtotime($_POST["dataFim"]));
+$tipoValor = (string) $_POST["tipoValor"];
+$sql = "";
 
-$filtroSql = "";
-$tipoContas = "";
-
+/* Verifica o tipo do valor e seleciona a query correta */
 switch ($tipoValor) {
     case $tipoValor == 'C':
-        $Sql = "";
-        $tipoContas = "Todos os títulos";
+        $sql = "SELECT
+                tb02278_codigo as CODIGO,
+                TB02278_SITUACAO AS SITUACAO,
+                TB02278_CINTERNO AS CODIGO_INTERNO,
+                TB02278_NUMVENDA as VENDA_ORIGEM_BENEFICIO,
+                TB02021_NTFISC NUM_NOTA,
+                FORMAT(ISNULL (TB02091_DATANOTA, TB02278_DATA), 'dd/MM/yyyy')  AS DATA_NOTA,
+                FORMAT(TB02278_DATA, 'dd/MM/yyyy') AS DATA_BENEFICIO,
+                TB01074_NOME AS TIPO_BENEFICIO,
+                TB02278_NOME AS HISTORICO,
+                TB02278_CODCLI AS CODCLI,
+                A.TB01008_NOME AS CLIENTE,
+                TB02278_MES AS MES,
+                FORMAT(TB02278_DTVALIDADE, 'dd/MM/yyy') AS VALIDADE,
+                TB02278_VLRBENEF AS VALOR_BENEFICIO,
+                TB02278_VLRUTILIZADO AS VALOR_UTILIZADO,
+                TB02278_VLRREST AS VALOR_RESTANTE,
+                TB02278_MARCANOME AS MARCA,
+                TB01107_NOME AS GRUPO_ECONOMICO
+
+
+                from VW02310
+
+                LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278_CODCLI
+                LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                LEFT JOIN TB02021 ON TB02021_CODIGO = TB02278_NUMVENDA
+                LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021_NTFISC
+
+                WHERE TB02278_CODCLI = ?
+                AND CAST(ISNULL(TB02091_DATANOTA, TB02278_DATA) AS DATE) BETWEEN ? AND ?
+                --AND TB01074_NOME in (@classificacao)
+                ";
         break;
     case $tipoValor == 'U':
-        $Sql = "";
-        $tipoContas = "Títulos recebidos";
+        $sql = "";
         break;
     case $tipoValor == 'E':
-        $Sql = "";
-        $tipoContas = "Títulos em aberto";
+        $sql = "";
         break;
 }
 
@@ -57,31 +84,31 @@ $nomesMeses = [
     <div class="month-grid">
         <!-- Exemplo de um mês (repita para os outros) -->
         <div class="month-card">
-            <div class="month-title"><?= $tipoContas ?> - <?= $nomesMeses[$mes] ?> de <?= $ano ?> - Periodo: <?= $periodo ?>  </div>
+            <!-- <div class="month-title"> -  de - Periodo:   </div> -->
             <table>
                 <thead>
                     <tr>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(0)">Título <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(0)">Codigo <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(1)">Empresa <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(1)">Situação <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(2)">Data Emissão <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(2)">Codigo interno <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(3)">Vencimento <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(3)">Origem beneficio <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(4)">Venc Original <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(4)">Nota <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(5)">Data Baixa <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(5)">Data Nota <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(6)">Dif Dias <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(6)">Data Beneficio <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(7)">Cliente <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(7)">Historico <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(8)">Valor Título <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(8)">Cliente <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(9)">Valor Pago <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(9)">Mês <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(10)">Tipo Documento <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(10)">Validade <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
                         <th>
                             <button class="btn-xls-detal" onclick="exportarExcel()"></button>
@@ -90,26 +117,13 @@ $nomesMeses = [
                     </tr>
                 </thead>
                 <?php
-                $sql = "SELECT 
-                            Func.TB04010_CODIGO,
-                            Func.TB04010_CODEMP,
-                            FORMAT(Func.TB04010_DTCAD, 'dd/MM/yyyy') TB04010_DTCAD,
-                            FORMAT(Tab.TB04010_DTVENC,'dd/MM/yyyy') TB04010_DTVENC,
-                            FORMAT(Func.TB04010_DTVENCORIGINAL, 'dd/MM/yyyy') TB04010_DTVENCORIGINAL,
-                            ISNULL(DATEDIFF(D, Func.TB04010_DTVENCORIGINAL, Func.TB04011_DTBAIXA), 0) DIEFERECA_DIAS,
-                            ISNULL(FORMAT(Func.TB04011_DTBAIXA, 'dd/MM/yyyy'), 'Aberto') TB04011_DTBAIXA,
-                            NOMECLIENTE,
-                            Func.TB04010_VLRTITULO,
-                            Func.TB04010_VLRPAGO,
-						    TipoDoc.TB04003_NOME
-                        FROM FTVENCIDO_DETAL_2($ano, $mes, '$periodo') as Func
-                        LEFT JOIN TB04010 Tab ON Tab.TB04010_CODIGO = Func.TB04010_CODIGO AND Tab.TB04010_CODCLI = Func.TB04010_CODCLI
-                        LEFT JOIN TB04003 TipoDoc ON TipoDoc.TB04003_CODIGO = Tab.TB04010_TIPDOC
+                
 
-                        $filtroSql
-                    ";
-
-                $stmt = sqlsrv_query($conn, $sql);
+                $stmt = sqlsrv_prepare($conn, $sql, [$cliente, $dataIni, $dataFim]);    
+                sqlsrv_execute($stmt);
+                if ($stmt === false) {
+                    die(print_r(sqlsrv_errors(), true));
+                }
                 ?>
                 <tbody>
                     <?php
@@ -117,30 +131,34 @@ $nomesMeses = [
                     {
                         return 'R$ ' . number_format((float) $valor, 2, ',', '.');
                     }
-                    $totalTitulo = 0;
-                    $totalPago = 0;
+                    $totalBeneficio = 0;
+                    $totalRest = 0;
 
                     $tabela = "";
 
                     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                        $titulo = (float) $row['TB04010_VLRTITULO'];
-                        $pago = (float) $row['TB04010_VLRPAGO'];
+                        $vlrBeneficio = (float) $row['VALOR_BENEFICIO'];
+                        $vlrRest = (float) $row['VALOR_RESTANTE'];
 
-                        $totalTitulo += $titulo;
-                        $totalPago += $pago;
+                        $totalBeneficio += $vlrBeneficio;
+                        $totalRest += $vlrRest; 
 
                         $tabela .= "<tr>";
-                        $tabela .= "<td>$row[TB04010_CODIGO]</td>";
-                        $tabela .= "<td>$row[TB04010_CODEMP]</td>";
-                        $tabela .= "<td>$row[TB04010_DTCAD]</td>";
-                        $tabela .= "<td>$row[TB04010_DTVENC]</td>";
-                        $tabela .= "<td>$row[TB04010_DTVENCORIGINAL]</td>";
-                        $tabela .= "<td>$row[TB04011_DTBAIXA]</td>";
-                        $tabela .= "<td>$row[DIEFERECA_DIAS]</td>";
-                        $tabela .= "<td>$row[NOMECLIENTE]</td>";
-                        $tabela .= "<td>" . formatarMoeda($titulo) . "</td>";
-                        $tabela .= "<td>" . formatarMoeda($pago) . "</td>";
-                        $tabela .= "<td>$row[TB04003_NOME]</td>";
+                        $tabela .= "<td>$row[CODIGO]</td>";
+                        $tabela .= "<td>$row[SITUACAO]</td>";
+                        $tabela .= "<td>$row[CODIGO_INTERNO]</td>";
+                        $tabela .= "<td>$row[NUM_NOTA]</td>";
+                        $tabela .= "<td>$row[DATA_NOTA]</td>";
+                        $tabela .= "<td>$row[DATA_BENEFICIO]</td>";
+                        $tabela .= "<td>$row[TIPO_BENEFICIO]</td>";
+                        $tabela .= "<td>$row[HISTORICO]</td>";
+                        $tabela .= "<td>$row[CLIENTE]</td>";
+                        $tabela .= "<td>$row[MES]</td>";
+                        $tabela .= "<td>$row[VALIDADE]</td>";
+                        $tabela .= "<td>" . formatarMoeda($vlrBeneficio) . "</td>";
+                        $tabela .= "<td>" . formatarMoeda($vlrRest) . "</td>";
+                        $tabela .= "<td>$row[MARCA]</td>";
+                        $tabela .= "<td>$row[GRUPO_ECONOMICO]</td>";
                         $tabela .= "<td></td>";
                         $tabela .= "</tr>";
                     }
@@ -151,8 +169,8 @@ $nomesMeses = [
                 <tfoot>
                     <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
                         <th colspan="8" style="text-align: right;">Totais:</th>
-                        <th><?= formatarMoeda($totalTitulo) ?></th>
-                        <th><?= formatarMoeda($totalPago) ?></th>
+                        <th><?= formatarMoeda($totalBeneficio) ?></th>
+                        <th><?= formatarMoeda($totalRest) ?></th>
                         <th></th>
                     </tr>
                 </tfoot>

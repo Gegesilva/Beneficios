@@ -39,9 +39,9 @@ if (empty($DataIni) && empty($DataFim)) {
     <h2><img src="img/logo.jpg" alt="logo"></h2>
     <div>
       <form method="POST">
-        <label for="year">Periodo: </label>
-        <input type="date" class="filtro" name="DataIni" onchange="this.form.submit()"
-          value="<?= htmlspecialchars($DataIni) ?>">
+        <label for="year">Data: </label>
+        <!-- <input type="date" class="filtro" name="DataIni" onchange="this.form.submit()"
+          value="<?= htmlspecialchars($DataIni) ?>"> -->
         <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()"
           value="<?= htmlspecialchars($DataFim) ?>">
       </form>
@@ -134,7 +134,7 @@ if (empty($DataIni) && empty($DataFim)) {
                           FULL JOIN Utilizado u  ON c.CODCLI = u.CODCLI AND c.GRUPO_ECONOMICO = u.GRUPO_ECONOMICO AND c.DATA = u.DATA
                           FULL JOIN Expirado e ON COALESCE(c.CODCLI, u.CODCLI) = e.CODCLI 
                               AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
-                              AND COALESCE(c.DATA, u.DATA) = e.DATA
+                              AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
 
                           WHERE CAST(c.DATA AS DATE) BETWEEN '$DataIni' AND '$DataFim'
 
