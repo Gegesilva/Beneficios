@@ -8,10 +8,10 @@ body {
 
 
 .header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  justify-content: space-between;
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
@@ -21,7 +21,7 @@ body {
 
 .header label{
   font-size: 20px;
-  color: blue;
+  color: #2b669c;
 }
 
 .filtro{
@@ -29,14 +29,45 @@ body {
   border: 0.5px;
   padding: 10px;
   background-color: rgb(225, 223, 223);
-  font-size: 20px;
+  font-size: 15px;
+  margin-right: 5px;
+}
+
+.filtroCliente{
+  border-radius: 15px;
+  border: 0.5px;
+  padding: 10px;
+  background-color: rgb(225, 223, 223);
+  font-size: 15px;
+  width: 200px;
+}
+
+.filtro:hover{
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+} 
+
+.filtroCliente:hover{
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 img{
   height: 28px;
   width: 50,2px;
+  flex: 0 0 auto;
 }
 
+.titulo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none; /* impede que ele atrapalhe clique nos outros */
+  color: #2b669c;
+}
 
 .month-grid {
   display: grid;

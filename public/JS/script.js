@@ -165,3 +165,34 @@
   }
 
 
+  // Preenche a lista de clientes dinamicamente
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('filtroCliente');
+    const linhas = document.querySelectorAll('.linha-click2');
+    const clientes = new Set();
+
+    linhas.forEach(linha => {
+      const nome = linha.cells[0].textContent.trim();
+      clientes.add(nome);
+    });
+
+    Array.from(clientes).sort().forEach(nome => {
+      const option = document.createElement('option');
+      option.value = nome;
+      option.textContent = nome;
+      select.appendChild(option);
+    });
+  });
+
+  // Filtra as linhas com base no cliente selecionado
+  function filtrarPorCliente() {
+    const filtro = document.getElementById('filtroCliente').value;
+    const linhas = document.querySelectorAll('.linha-click2');
+
+    linhas.forEach(linha => {
+      const nome = linha.cells[0].textContent.trim();
+      linha.style.display = (!filtro || nome === filtro) ? '' : 'none';
+    });
+  }
+
+

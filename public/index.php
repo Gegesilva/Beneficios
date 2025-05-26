@@ -36,16 +36,28 @@ if (empty($DataIni) && empty($DataFim)) {
 <body>
 
   <div class="header">
-    <h2><img src="img/logo.jpg" alt="logo"></h2>
-    <div>
+    <div class="logo">
+      <img src="img/logo.jpg" alt="logo">
+    </div>
+
+    <div class="titulo">
+      Benefícios - Data base
+    </div>
+
+    <div class="filtros">
       <form method="POST">
         <label for="year">Data: </label>
-        <!-- <input type="date" class="filtro" name="DataIni" onchange="this.form.submit()"
-          value="<?= htmlspecialchars($DataIni) ?>"> -->
         <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()"
           value="<?= htmlspecialchars($DataFim) ?>">
+
+        <label for="filtroCliente">Cliente: </label>
+        <select id="filtroCliente" class="filtroCliente" onchange="filtrarPorCliente()">
+          <option value="">-- Todos os clientes --</option>
+        </select>
       </form>
     </div>
+  </div>
+
 
   </div>
 
@@ -66,7 +78,8 @@ if (empty($DataIni) && empty($DataFim)) {
                 aria-hidden="true"></i></th>
             <th class="titulo-col-tab" onclick="ordenarTabela(5)">Valor Expirado <i class="fa fa-sort"
                 aria-hidden="true"></i></th>
-            <th class="titulo-col-tab" onclick="ordenarTabela(6)">Valor Final <i class="fa fa-sort" aria-hidden="true"></i>
+            <th class="titulo-col-tab" onclick="ordenarTabela(6)">Valor Final <i class="fa fa-sort"
+                aria-hidden="true"></i>
             </th>
             <th>
               <button class="btn-xls-detal" onclick="exportarExcel()"></button>
@@ -140,7 +153,7 @@ if (empty($DataIni) && empty($DataFim)) {
 
                   ";
 
-        $stmt = sqlsrv_prepare($conn, $sql,[]);
+        $stmt = sqlsrv_prepare($conn, $sql, []);
         sqlsrv_execute($stmt);
         ?>
         <tbody>
@@ -149,7 +162,7 @@ if (empty($DataIni) && empty($DataFim)) {
           {
             return 'R$ ' . number_format((float) $valor, 2, ',', '.');
           }
-         
+
           $tabela = "";
 
           while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {

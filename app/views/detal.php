@@ -10,6 +10,12 @@ $dataFim = date('Y-m-d', strtotime($_POST["dataFim"]));
 $tipoValor = (string) $_POST["tipoValor"];
 $sql = "";
 
+if (empty($DataFim)) {
+    /* Se a data final não for informada, define o período como o ano atual */
+    /* $DataIni = date('Y-m-d', strtotime('-1 year', strtotime($DataFim))) */
+    $DataIni = date('Y-01-01');
+    $DataFim = date('Y-m-d');
+  }
 /* Verifica o tipo do valor e seleciona a query correta */
 switch ($tipoValor) {
     case $tipoValor == 'C':
@@ -43,7 +49,6 @@ switch ($tipoValor) {
 
                 WHERE TB02278_CODCLI = ?
                 AND CAST(ISNULL(TB02091_DATANOTA, TB02278_DATA) AS DATE) BETWEEN ? AND ?
-                --AND TB01074_NOME in (@classificacao)
                 ";
         break;
     case $tipoValor == 'U':
@@ -114,20 +119,18 @@ switch ($tipoValor) {
         break;
 }
 
-$nomesMeses = [
-    1 => 'janeiro',
-    2 => 'fevereiro',
-    3 => 'março',
-    4 => 'abril',
-    5 => 'maio',
-    6 => 'junho',
-    7 => 'julho',
-    8 => 'agosto',
-    9 => 'setembro',
-    10 => 'outubro',
-    11 => 'novembro',
-    12 => 'dezembro'
-];
+/* Pega nome de cliente */
+$clienteNome = "SELECT TB01008_NOME FROM TB01008 WHERE TB01008_CODIGO = ?";
+$stmtCliente = sqlsrv_prepare($conn, $clienteNome, [$cliente]);
+if (sqlsrv_execute($stmtCliente) === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+$rowCliente = sqlsrv_fetch_array($stmtCliente, SQLSRV_FETCH_ASSOC);
+$clienteNome = $rowCliente['TB01008_NOME'] ?? 'Cliente não encontrado';
+if ($stmtCliente === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -144,7 +147,7 @@ $nomesMeses = [
     <div class="month-grid">
         <!-- Exemplo de um mês (repita para os outros) -->
         <div class="month-card">
-            <!-- <div class="month-title"> -  de - Periodo:   </div> -->
+            <div class="month-title"> Cliente: <?= $clienteNome ?>   </div>
             <table>
                 <thead>
                     <tr>
