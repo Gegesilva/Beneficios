@@ -189,7 +189,7 @@ if (empty($DataIni) && empty($DataFim)) {
   <script src="JS/script.js" charset="utf-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <form id="detalForm" method="get" action="../app/views/detal.php" style="display: none;">
+  <form id="detalForm" method="post" action="../app/views/detal.php" style="display: none;">
     <input type="hidden" name="cliente" id="cliente">
     <input type="hidden" name="dataIni" id="dataIni">
     <input type="hidden" name="dataFim" id="dataFim">

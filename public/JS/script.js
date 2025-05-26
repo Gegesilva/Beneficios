@@ -6,9 +6,7 @@
     document.getElementById('detalForm').submit();
   }
 
-  function voltar() {
-    history.back();
-  }
+ 
 
 
   /* Grafico */
@@ -158,6 +156,12 @@
     a.click();
     document.body.removeChild(a);
 
+  }
+
+
+
+  function voltar() {
+    window.history.back();
   }
 
 

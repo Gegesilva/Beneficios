@@ -4,25 +4,25 @@ include "../../Config/config.php";
 include "../../Config/database.php";
 
 
-$ano = (INT) $_POST["ano"];
-$mes = (INT) $_POST["mes"];
-$periodo = (STRING) $_POST["periodo"];
+$cliente = (string) $_POST["cliente"];
+$dataIni = $_POST["dataIni"];
+$dataFim = $_POST["dataFim"];
 $tipoValor = (STRING) $_POST["tipoValor"];
 
 $filtroSql = "";
 $tipoContas = "";
 
 switch ($tipoValor) {
-    case $tipoValor == '1':
-        $filtroSql = "";
+    case $tipoValor == 'C':
+        $Sql = "";
         $tipoContas = "Todos os títulos";
         break;
-    case $tipoValor == '2':
-        $filtroSql = "WHERE TB04011_DTBAIXA IS NOT NULL";
+    case $tipoValor == 'U':
+        $Sql = "";
         $tipoContas = "Títulos recebidos";
         break;
-    case $tipoValor == '3':
-        $filtroSql = "WHERE TB04011_DTBAIXA IS NULL";
+    case $tipoValor == 'E':
+        $Sql = "";
         $tipoContas = "Títulos em aberto";
         break;
 }
