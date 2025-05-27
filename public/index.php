@@ -149,7 +149,6 @@ if (empty($DataIni) && empty($DataFim)) {
                               AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
 
                           WHERE CAST(c.DATA AS DATE) BETWEEN '$DataIni' AND '$DataFim'
-
                   ";
 
         $stmt = sqlsrv_prepare($conn, $sql, []);
