@@ -10,12 +10,14 @@ $dataFim = date('Y-m-d', strtotime($_POST["dataFim"]));
 $tipoValor = (string) $_POST["tipoValor"];
 $sql = "";
 
+
 if (empty($DataFim)) {
     /* Se a data final não for informada, define o período como o ano atual */
     /* $DataIni = date('Y-m-d', strtotime('-1 year', strtotime($DataFim))) */
     $DataIni = date('Y-01-01');
     $DataFim = date('Y-m-d');
   }
+
 /* Verifica o tipo do valor e seleciona a query correta */
 switch ($tipoValor) {
     case $tipoValor == 'C':

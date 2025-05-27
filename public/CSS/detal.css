@@ -110,7 +110,7 @@ th {
 }
 
 /* RESPONSIVIDADE PARA TELAS PEQUENAS */
-@media (max-width: 600px) {
+@media (max-width: 1200px) {
   body {
     padding: 10px;
   }
