@@ -56,6 +56,7 @@ if (empty($DataIni) && empty($DataFim)) {
         </select>
       </form>
     </div>
+    
   </div>
 
   </div>

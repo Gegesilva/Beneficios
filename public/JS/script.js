@@ -160,9 +160,6 @@
 
 
 
-  function voltar() {
-    window.history.back();
-  }
 
 
   // Preenche a lista de clientes dinamicamente
@@ -196,3 +193,33 @@
   }
 
 
+  function salvarFiltro() {
+    const filtro = {
+      nome: document.getElementById('filtroCliente').value,
+    };
+  
+    localStorage.setItem('filtroCliente', JSON.stringify(filtro)); 
+  }
+  
+  function carregarFiltro() {
+    const filtroSalvo = localStorage.getItem('filtroCliente'); 
+    if (filtroSalvo) {
+      const filtro = JSON.parse(filtroSalvo);
+      document.getElementById('filtroCliente').value = filtro.nome;
+
+      filtrarPorCliente(); // Aplica o filtro ao carregar a página
+    }
+  
+  }
+
+  
+  // Carrega o filtro ao carregar a página
+  carregarFiltro();
+  
+  // Adiciona um evento para salvar o filtro
+  document.getElementById('filtroCliente').addEventListener('change', salvarFiltro);
+  
+
+  function voltar() {
+    history.back();
+  }
