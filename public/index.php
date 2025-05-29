@@ -10,8 +10,8 @@ ini_set('display_errors', '0'); // Garante que erros não sejam exibidos no nave
 $DataIni = $_POST['DataIni'];
 $DataFim = $_POST['DataFim'];
 
-if (empty($DataIni) && empty($DataFim)) {
-  $DataIni = date('Y-01-01');
+if (isset($DataFim)) {
+  $DataIni = date('2021-01-01');
   $DataFim = date('Y-m-t');
 } else {
   if (empty($DataIni)) {
@@ -56,6 +56,7 @@ if (empty($DataIni) && empty($DataFim)) {
         </select>
       </form>
     </div>
+    
   </div>
 
   </div>
@@ -91,7 +92,7 @@ if (empty($DataIni) && empty($DataFim)) {
                                   TB02278_CODCLI AS CODCLI,
                                   TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
                                   A.TB01008_NOME AS CLIENTE,
-                                  ISNULL(TB02091_DATANOTA, TB02278_DATA) AS DATA,
+                                  CAST(ISNULL(TB02091_DATANOTA, TB02278_DATA) AS DATE) AS DATA,
                                   SUM(TB02278_VLRBENEF) AS VALOR_CONCEDIDO
                               FROM VW02310
                               LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278_CODCLI
@@ -105,7 +106,7 @@ if (empty($DataIni) && empty($DataFim)) {
                                   TB02278.TB02278_CODCLI AS CODCLI,
                                   TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
                                   A.TB01008_NOME AS CLIENTE,
-                                  TB02091_DATA AS DATA,
+                                  CAST(TB02091_DATA AS DATE) AS DATA,
                                   SUM(VLRDESCBENEF) AS VALOR_UTILIZADO
                               FROM VW02311
                               LEFT JOIN TB02278 ON TB02278_CODIGO = BENEFICIO
@@ -120,7 +121,7 @@ if (empty($DataIni) && empty($DataFim)) {
                                   vw02310.TB02278_CODCLI AS CODCLI,
                                   TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
                                   A.TB01008_NOME AS CLIENTE,
-                                  ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA) AS DATA,
+                                  CAST(ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA) AS DATE) AS DATA,
                                   SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO
                               FROM VW02310
                               LEFT JOIN TB02278 AS B ON B.TB02278_CODIGO = vw02310.TB02278_CODIGO
@@ -148,7 +149,7 @@ if (empty($DataIni) && empty($DataFim)) {
                               AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
                               AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
 
-                          WHERE CAST(c.DATA AS DATE) BETWEEN '$DataIni' AND '$DataFim'
+                          WHERE COALESCE(c.DATA, e.DATA, u.DATA) BETWEEN '$DataIni' AND '$DataFim'
                   ";
 
         $stmt = sqlsrv_prepare($conn, $sql, []);
@@ -164,25 +165,55 @@ if (empty($DataIni) && empty($DataFim)) {
           $tabela = "";
 
           while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $valorInicial = (float) $row['VALOR_INICIAL'];
-            $valorConcedido = (float) $row['VALOR_CONCEDIDO'];
-            $valorUtilizado = (float) $row['VALOR_UTILIZADO'];
-            $valorExpirado = (float) $row['VALOR_EXPIRADO'];
-            $valorfinal = (float) $row['VALOR_FINAL'];
-
-
+            $chave = $row['CLIENTE']/*  . '|' . $row['GRUPO_ECONOMICO'] */;
+        
+            if (!isset($agrupados[$chave])) {
+                $agrupados[$chave] = [
+                    'CLIENTE' => $row['CLIENTE'],
+                    'GRUPO_ECONOMICO' => $row['GRUPO_ECONOMICO'],
+                    'CODCLI' => $row['CODCLI'],
+                    'VALOR_INICIAL' => 0,
+                    'VALOR_CONCEDIDO' => 0,
+                    'VALOR_UTILIZADO' => 0,
+                    'VALOR_EXPIRADO' => 0,
+                    'VALOR_FINAL' => 0,
+                ];
+            }
+        
+            $agrupados[$chave]['VALOR_INICIAL']   += (float) $row['VALOR_INICIAL'];
+            $agrupados[$chave]['VALOR_CONCEDIDO'] += (float) $row['VALOR_CONCEDIDO'];
+            $agrupados[$chave]['VALOR_UTILIZADO'] += (float) $row['VALOR_UTILIZADO'];
+            $agrupados[$chave]['VALOR_EXPIRADO']  += (float) $row['VALOR_EXPIRADO'];
+            $agrupados[$chave]['VALOR_FINAL']     += (float) $row['VALOR_FINAL'];
+        }
+        
+        // Monta a tabela HTML
+        $tabela = "";
+        
+        foreach ($agrupados as $row) {
+            $valorInicial   = $row['VALOR_INICIAL'];
+            $valorConcedido = $row['VALOR_CONCEDIDO'];
+            $valorUtilizado = $row['VALOR_UTILIZADO'];
+            $valorExpirado  = $row['VALOR_EXPIRADO'];
+            $valorfinal     = $row['VALOR_FINAL'];
+        
+            $cliente        = htmlspecialchars($row['CLIENTE']);
+            $grupoEconomico = htmlspecialchars($row['GRUPO_ECONOMICO']);
+            $codCli         = htmlspecialchars($row['CODCLI'], ENT_QUOTES);
+        
             $tabela .= "<tr class='linha-click2'>";
-            $tabela .= "<td>$row[CLIENTE]</td>";
-            $tabela .= "<td>$row[GRUPO_ECONOMICO]</td>";
+            $tabela .= "<td>{$cliente}</td>";
+            $tabela .= "<td>{$grupoEconomico}</td>";
             $tabela .= "<td>" . formatarMoeda($valorInicial) . "</td>";
-            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$row[CODCLI]', '$DataIni', '$DataFim', 'C')\">" . formatarMoeda($valorConcedido) . "</td>";
-            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$row[CODCLI]', '$DataIni', '$DataFim', 'U')\">" . formatarMoeda($valorUtilizado) . "</td>";
-            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('$row[CODCLI]', '$DataIni', '$DataFim', 'E')\">" . formatarMoeda($valorExpirado) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'C')\">" . formatarMoeda($valorConcedido) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'U')\">" . formatarMoeda($valorUtilizado) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'E')\">" . formatarMoeda($valorExpirado) . "</td>";
             $tabela .= "<td>" . formatarMoeda($valorfinal) . "</td>";
             $tabela .= "<td></td>";
             $tabela .= "</tr>";
-          }
-          print ($tabela);
+        }
+        
+        echo $tabela;
           ?>
 
         </tbody>

@@ -11,7 +11,7 @@ $tipoValor = (string) $_POST["tipoValor"];
 $sql = "";
 
 
-if (empty($DataFim)) {
+if (isset($DataFim)) {
     /* Se a data final não for informada, define o período como o ano atual */
     /* $DataIni = date('Y-m-d', strtotime('-1 year', strtotime($DataFim))) */
     $DataIni = date('Y-01-01');
@@ -123,12 +123,12 @@ switch ($tipoValor) {
 
 /* Pega nome de cliente */
 $clienteNome = "SELECT TB01008_NOME FROM TB01008 WHERE TB01008_CODIGO = ?";
-$stmtCliente = sqlsrv_prepare($conn, $clienteNome, [$cliente]);
+$stmtCliente = sqlsrv_prepare($conn, $clienteNome, [&$cliente]);
 if (sqlsrv_execute($stmtCliente) === false) {
     die(print_r(sqlsrv_errors(), true));
 }
 $rowCliente = sqlsrv_fetch_array($stmtCliente, SQLSRV_FETCH_ASSOC);
-$clienteNome = $rowCliente['TB01008_NOME'] ?? 'Cliente não encontrado';
+$clienteNome = isset($rowCliente['TB01008_NOME']) ? $rowCliente['TB01008_NOME'] : 'Cliente não encontrado';
 if ($stmtCliente === false) {
     die(print_r(sqlsrv_errors(), true));
 }
@@ -188,14 +188,14 @@ if ($stmtCliente === false) {
                         <th>
 
                             <button class="btn-xls-detal" onclick="exportarExcel()"></button>
-                            <button class="btn-voltar-detal" onclick="voltar()"></button>
+                            <button id="btn-voltar" class="btn-voltar-detal" onclick="voltar()"></button>
                         </th>
                     </tr>
                 </thead>
                 <?php
 
 
-                $stmt = sqlsrv_prepare($conn, $sql, [$cliente, $dataIni, $dataFim]);
+                $stmt = sqlsrv_prepare($conn, $sql, [&$cliente, &$dataIni, &$dataFim]);
                 sqlsrv_execute($stmt);
                 if ($stmt === false) {
                     die(print_r(sqlsrv_errors(), true));
