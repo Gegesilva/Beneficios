@@ -88,7 +88,7 @@ switch ($tipoValor) {
         LEFT JOIN TB01074 ON TB01074_CODIGO = TB02278_CLASSIFICACAO
         LEFT JOIN TB02091 ON TB02091_NTFISC = NTFISC AND TB02091_CODEMP = CODEMP
 
-        WHERE CODCLI = ?
+        WHERE TB01107_CODIGO = ?
         AND CAST(TB02091_DATA AS DATE) BETWEEN ? AND ?";
 
         $ocultarUtil = "table-cell"; // Exibe coluna de valor utilizado

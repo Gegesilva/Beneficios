@@ -142,12 +142,15 @@ if (!isset($DataFim)) {
                               ISNULL(c.VALOR_CONCEDIDO, 0) AS VALOR_CONCEDIDO,
                               ISNULL(u.VALOR_UTILIZADO, 0) AS VALOR_UTILIZADO,
                               ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_EXPIRADO,
-                              0 + ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_FINAL
+                              0 + ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_FINAL,
+                              TB01107_CODIGO CODGRUPO
                           FROM Concedido c
                           FULL JOIN Utilizado u  ON c.CODCLI = u.CODCLI AND c.GRUPO_ECONOMICO = u.GRUPO_ECONOMICO AND c.DATA = u.DATA
                           FULL JOIN Expirado e ON COALESCE(c.CODCLI, u.CODCLI) = e.CODCLI 
                               AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
                               AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
+                          LEFT JOIN TB01008 AS A ON TB01008_CODIGO = COALESCE(c.CODCLI, u.CODCLI, e.CODCLI)
+                          LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
 
                           WHERE COALESCE(c.DATA, e.DATA, u.DATA) BETWEEN '$DataIni' AND '$DataFim'
                   ";
@@ -171,6 +174,7 @@ if (!isset($DataFim)) {
                 $agrupados[$chave] = [
                     'CLIENTE' => $row['CLIENTE'],
                     'GRUPO_ECONOMICO' => $row['GRUPO_ECONOMICO'],
+                    'COD_GRUPO' => $row['CODGRUPO'],
                     'CODCLI' => $row['CODCLI'],
                     'VALOR_INICIAL' => 0,
                     'VALOR_CONCEDIDO' => 0,
@@ -185,6 +189,7 @@ if (!isset($DataFim)) {
             $agrupados[$chave]['VALOR_UTILIZADO'] += (float) $row['VALOR_UTILIZADO'];
             $agrupados[$chave]['VALOR_EXPIRADO']  += (float) $row['VALOR_EXPIRADO'];
             $agrupados[$chave]['VALOR_FINAL']     += (float) $row['VALOR_FINAL'];
+            $agrupados[$chave]['CODGRUPO']     += (float) $row['COD_GRUPO'];
         }
         
         // Monta a tabela HTML
@@ -200,13 +205,14 @@ if (!isset($DataFim)) {
             $cliente        = htmlspecialchars($row['CLIENTE']);
             $grupoEconomico = htmlspecialchars($row['GRUPO_ECONOMICO']);
             $codCli         = htmlspecialchars($row['CODCLI'], ENT_QUOTES);
+            $codGrupo       = htmlspecialchars($row['COD_GRUPO'], ENT_QUOTES);
         
             $tabela .= "<tr class='linha-click2'>";
             $tabela .= "<td>{$cliente}</td>";
             $tabela .= "<td>{$grupoEconomico}</td>";
             $tabela .= "<td>" . formatarMoeda($valorInicial) . "</td>";
             $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'C')\">" . formatarMoeda($valorConcedido) . "</td>";
-            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'U')\">" . formatarMoeda($valorUtilizado) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codGrupo}', '{$DataIni}', '{$DataFim}', 'U')\">" . formatarMoeda($valorUtilizado) . "</td>";
             $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'E')\">" . formatarMoeda($valorExpirado) . "</td>";
             $tabela .= "<td>" . formatarMoeda($valorfinal) . "</td>";
             $tabela .= "<td></td>";
