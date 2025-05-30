@@ -10,12 +10,12 @@ ini_set('display_errors', '0'); // Garante que erros não sejam exibidos no nave
 $DataIni = $_POST['DataIni'];
 $DataFim = $_POST['DataFim'];
 
-if (isset($DataFim)) {
+if (!isset($DataFim)) {
   $DataIni = date('2021-01-01');
   $DataFim = date('Y-m-t');
 } else {
   if (empty($DataIni)) {
-    $DataIni = date('Y-01-01');
+    $DataIni = date('2021-01-01');
   }
   if (empty($DataFim)) {
     $DataFim = date('Y-m-t');
@@ -92,21 +92,21 @@ if (isset($DataFim)) {
                                   TB02278_CODCLI AS CODCLI,
                                   TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
                                   A.TB01008_NOME AS CLIENTE,
-                                  CAST(ISNULL(TB02091_DATANOTA, TB02278_DATA) AS DATE) AS DATA,
+                                  CAST(TB02278_DATA AS DATE) AS DATA,
                                   SUM(TB02278_VLRBENEF) AS VALOR_CONCEDIDO
                               FROM VW02310
                               LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278_CODCLI
                               LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
                               LEFT JOIN TB02021 ON TB02021_CODIGO = TB02278_NUMVENDA
-                              LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021_NTFISC
-                              GROUP BY TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, ISNULL(TB02091_DATANOTA, TB02278_DATA)
+                              LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021_NTFISC AND TB02091_CODEMP = TB02021_CODEMP
+                              GROUP BY TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02278_DATA
                           ),
                           Utilizado AS (
                               SELECT 
                                   TB02278.TB02278_CODCLI AS CODCLI,
                                   TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
                                   A.TB01008_NOME AS CLIENTE,
-                                  CAST(TB02091_DATA AS DATE) AS DATA,
+                                  CAST(ISNULL(TB02091_DATA, TB02278_DTCAD) AS DATE) AS DATA,
                                   SUM(VLRDESCBENEF) AS VALOR_UTILIZADO
                               FROM VW02311
                               LEFT JOIN TB02278 ON TB02278_CODIGO = BENEFICIO
@@ -114,7 +114,7 @@ if (isset($DataFim)) {
                               LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
                               LEFT JOIN TB01074 ON TB01074_CODIGO = TB02278_CLASSIFICACAO
                               LEFT JOIN TB02091 ON TB02091_NTFISC = NTFISC AND TB02091_CODEMP = CODEMP
-                              GROUP BY TB02278.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02091_DATA
+                              GROUP BY TB02278.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02091_DATA, TB02278_DTCAD
                           ),
                           Expirado AS (
                               SELECT 
