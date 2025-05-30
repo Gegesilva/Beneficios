@@ -9,6 +9,9 @@ $dataIni = date('Y-m-d', strtotime($_POST["dataIni"]));
 $dataFim = date('Y-m-d', strtotime($_POST["dataFim"]));
 $tipoValor = (string) $_POST["tipoValor"];
 $sql = "";
+$ocultarBen = "none";
+$ocultarUtil = "none";
+$ocultarRest = "none";
 
 
 if (isset($DataFim)) {
@@ -22,24 +25,24 @@ if (isset($DataFim)) {
 switch ($tipoValor) {
     case $tipoValor == 'C':
         $sql = "SELECT
-                tb02278_codigo as CODIGO,
-                TB02278_SITUACAO AS SITUACAO,
-                TB02278_CINTERNO AS CODIGO_INTERNO,
-                TB02278_NUMVENDA as VENDA_ORIGEM_BENEFICIO,
-                TB02021_NTFISC NUM_NOTA,
-                FORMAT(ISNULL (TB02091_DATANOTA, TB02278_DATA), 'dd/MM/yyyy')  AS DATA_NOTA,
-                FORMAT(TB02278_DATA, 'dd/MM/yyyy') AS DATA_BENEFICIO,
-                TB01074_NOME AS TIPO_BENEFICIO,
-                TB02278_NOME AS HISTORICO,
-                TB02278_CODCLI AS CODCLI,
-                A.TB01008_NOME AS CLIENTE,
-                TB02278_MES AS MES,
-                FORMAT(TB02278_DTVALIDADE, 'dd/MM/yyy') AS VALIDADE,
-                TB02278_VLRBENEF AS VALOR_BENEFICIO,
-                TB02278_VLRUTILIZADO AS VALOR_UTILIZADO,
-                TB02278_VLRREST AS VALOR_RESTANTE,
-                TB02278_MARCANOME AS MARCA,
-                TB01107_NOME AS GRUPO_ECONOMICO
+                    tb02278_codigo as CODIGO,
+                    TB02278_SITUACAO AS SITUACAO,
+                    TB02278_CINTERNO AS CODIGO_INTERNO,
+                    TB02278_NUMVENDA as VENDA_ORIGEM_BENEFICIO,
+                    TB02021_NTFISC NUM_NOTA,
+                    FORMAT(ISNULL (TB02091_DATANOTA, TB02278_DATA), 'dd/MM/yyyy')  AS DATA_NOTA,
+                    FORMAT(TB02278_DATA, 'dd/MM/yyyy') AS DATA_BENEFICIO,
+                    TB01074_NOME AS TIPO_BENEFICIO,
+                    TB02278_NOME AS HISTORICO,
+                    TB02278_CODCLI AS CODCLI,
+                    A.TB01008_NOME AS CLIENTE,
+                    TB02278_MES AS MES,
+                    FORMAT(TB02278_DTVALIDADE, 'dd/MM/yyy') AS VALIDADE,
+                    TB02278_VLRBENEF AS VALOR_BENEFICIO,
+                    TB02278_VLRUTILIZADO AS VALOR_UTILIZADO,
+                    TB02278_VLRREST AS VALOR_RESTANTE,
+                    TB02278_MARCANOME AS MARCA,
+                    TB01107_NOME AS GRUPO_ECONOMICO
 
 
                 from VW02310
@@ -52,6 +55,8 @@ switch ($tipoValor) {
                 WHERE TB02278_CODCLI = ?
                 AND CAST(ISNULL(TB02091_DATANOTA, TB02278_DATA) AS DATE) BETWEEN ? AND ?
                 ";
+
+        $ocultarBen = "table-cell"; // Exibe coluna de valor beneficio
         break;
     case $tipoValor == 'U':
         $sql = "SELECT
@@ -85,6 +90,8 @@ switch ($tipoValor) {
 
         WHERE CODCLI = ?
         AND CAST(TB02091_DATA AS DATE) BETWEEN ? AND ?";
+
+        $ocultarUtil = "table-cell"; // Exibe coluna de valor utilizado
         break;
     case $tipoValor == 'E':
         $sql = "SELECT
@@ -118,6 +125,8 @@ switch ($tipoValor) {
             WHERE vw02310.TB02278_CODCLI = ?
             AND CAST(DATAMES AS DATE) BETWEEN ? AND ?
             AND vw02310.TB02278_SITUACAO = 'I'";
+            
+        $ocultarBen = "table-cell"; // Exibe coluna de valor beneficio
         break;
 }
 
@@ -177,12 +186,14 @@ if ($stmtCliente === false) {
                                 aria-hidden="true"></i></th>
                         <th class="titulo-col-tab" onclick="ordenarTabela(11)">Validade <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(12)">Valor Beneficio <i class="fa fa-sort"
-                                aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(13)">Valor Utilizado <i class="fa fa-sort"
-                                aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(14)">Valor Restante <i class="fa fa-sort"
-                                aria-hidden="true"></i></th>
+                        <th class="titulo-col-tab" style="display: <?= $ocultarBen ?>" onclick="ordenarTabela(12)">Valor
+                            Beneficio <i class="fa fa-sort" aria-hidden="true"></i></th>
+                        <th class="titulo-col-tab" style="display: <?= $ocultarUtil ?>" onclick="ordenarTabela(13)">
+                            Valor
+                            Utilizado <i class="fa fa-sort" aria-hidden="true"></i></th>
+                        <th class="titulo-col-tab" style="display: <?= $ocultarRest ?>" onclick="ordenarTabela(14)">
+                            Valor
+                            Restante <i class="fa fa-sort" aria-hidden="true"></i></th>
                         <th class="titulo-col-tab" onclick="ordenarTabela(15)">Marca <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
                         <th class="titulo-col-tab" onclick="ordenarTabela(16)">Grupo <i class="fa fa-sort"
@@ -237,9 +248,9 @@ if ($stmtCliente === false) {
                         $tabela .= "<td>$row[CLIENTE]</td>";
                         $tabela .= "<td>$row[MES]</td>";
                         $tabela .= "<td>$row[VALIDADE]</td>";
-                        $tabela .= "<td>" . formatarMoeda($vlrBeneficio) . "</td>";
-                        $tabela .= "<td>" . formatarMoeda($vlrUtilizado) . "</td>";
-                        $tabela .= "<td>" . formatarMoeda($vlrRest) . "</td>";
+                        $tabela .= "<td style='display: $ocultarBen;'>" . formatarMoeda($vlrBeneficio) . "</td>";
+                        $tabela .= "<td style='display: $ocultarUtil;'>" . formatarMoeda($vlrUtilizado) . "</td>";
+                        $tabela .= "<td style='display: $ocultarRest;'>" . formatarMoeda($vlrRest) . "</td>";
                         $tabela .= "<td>$row[MARCA]</td>";
                         $tabela .= "<td>$row[GRUPO_ECONOMICO]</td>";
                         $tabela .= "<td></td>";
