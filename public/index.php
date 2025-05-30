@@ -121,8 +121,8 @@ if (!isset($DataFim)) {
                                   vw02310.TB02278_CODCLI AS CODCLI,
                                   TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
                                   A.TB01008_NOME AS CLIENTE,
-                                  CAST(ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA) AS DATE) AS DATA,
-                                  SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO
+                                  SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO,
+								                  CONVERT(date, '01/' + vw02310.TB02278_MES, 103) DATA
                               FROM VW02310
                               LEFT JOIN TB02278 AS B ON B.TB02278_CODIGO = vw02310.TB02278_CODIGO
                               LEFT JOIN TB01008 AS A ON TB01008_CODIGO = vw02310.TB02278_CODCLI
@@ -130,7 +130,7 @@ if (!isset($DataFim)) {
                               LEFT JOIN TB02021 ON TB02021_CODIGO = vw02310.TB02278_NUMVENDA
                               LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021.TB02021_NTFISC
                               WHERE vw02310.TB02278_SITUACAO = 'I'
-                              GROUP BY vw02310.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA)
+                              GROUP BY vw02310.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, vw02310.TB02278_MES
                           )
 
                           SELECT 
