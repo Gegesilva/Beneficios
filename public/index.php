@@ -10,12 +10,12 @@ ini_set('display_errors', '0'); // Garante que erros não sejam exibidos no nave
 $DataIni = $_POST['DataIni'];
 $DataFim = $_POST['DataFim'];
 
-if (isset($DataFim)) {
+if (!isset($DataFim)) {
   $DataIni = date('2021-01-01');
   $DataFim = date('Y-m-t');
 } else {
   if (empty($DataIni)) {
-    $DataIni = date('Y-01-01');
+    $DataIni = date('2021-01-01');
   }
   if (empty($DataFim)) {
     $DataFim = date('Y-m-t');

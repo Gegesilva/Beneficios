@@ -16,7 +16,7 @@ if (isset($DataFim)) {
     /* $DataIni = date('Y-m-d', strtotime('-1 year', strtotime($DataFim))) */
     $DataIni = date('Y-01-01');
     $DataFim = date('Y-m-d');
-  }
+}
 
 /* Verifica o tipo do valor e seleciona a query correta */
 switch ($tipoValor) {
@@ -149,7 +149,7 @@ if ($stmtCliente === false) {
     <div class="month-grid">
         <!-- Exemplo de um mês (repita para os outros) -->
         <div class="month-card">
-            <div class="month-title"> Cliente: <?= $clienteNome ?>   </div>
+            <div class="month-title"> Cliente: <?= $clienteNome ?> </div>
             <table>
                 <thead>
                     <tr>
@@ -179,11 +179,13 @@ if ($stmtCliente === false) {
                                 aria-hidden="true"></i></th>
                         <th class="titulo-col-tab" onclick="ordenarTabela(12)">Valor Beneficio <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(13)">Valor Restante <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(13)">Valor Utilizado <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(14)">Marca <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(14)">Valor Restante <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(15)">Grupo <i class="fa fa-sort"
+                        <th class="titulo-col-tab" onclick="ordenarTabela(15)">Marca <i class="fa fa-sort"
+                                aria-hidden="true"></i></th>
+                        <th class="titulo-col-tab" onclick="ordenarTabela(16)">Grupo <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
                         <th>
 
@@ -209,15 +211,18 @@ if ($stmtCliente === false) {
                     }
                     $totalBeneficio = 0;
                     $totalRest = 0;
+                    $totalUtilzado = 0;
 
                     $tabela = "";
 
                     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                         $vlrBeneficio = (float) $row['VALOR_BENEFICIO'];
                         $vlrRest = (float) $row['VALOR_RESTANTE'];
+                        $vlrUtilizado = (float) $row['VALOR_UTILIZADO'];
 
                         $totalBeneficio += $vlrBeneficio;
                         $totalRest += $vlrRest;
+                        $totalUtilzado += $vlrUtilizado;
 
                         $tabela .= "<tr>";
                         $tabela .= "<td>$row[CODIGO]</td>";
@@ -233,6 +238,7 @@ if ($stmtCliente === false) {
                         $tabela .= "<td>$row[MES]</td>";
                         $tabela .= "<td>$row[VALIDADE]</td>";
                         $tabela .= "<td>" . formatarMoeda($vlrBeneficio) . "</td>";
+                        $tabela .= "<td>" . formatarMoeda($vlrUtilizado) . "</td>";
                         $tabela .= "<td>" . formatarMoeda($vlrRest) . "</td>";
                         $tabela .= "<td>$row[MARCA]</td>";
                         $tabela .= "<td>$row[GRUPO_ECONOMICO]</td>";
@@ -247,6 +253,7 @@ if ($stmtCliente === false) {
                     <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
                         <th colspan="12" style="text-align: right;">Totais:</th>
                         <th><?= formatarMoeda($totalBeneficio) ?></th>
+                        <th><?= formatarMoeda($totalUtilzado) ?></th>
                         <th><?= formatarMoeda($totalRest) ?></th>
                         <th></th>
                         <th></th>
