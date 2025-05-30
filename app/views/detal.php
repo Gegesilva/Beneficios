@@ -125,7 +125,7 @@ switch ($tipoValor) {
             WHERE vw02310.TB02278_CODCLI = ?
             AND CAST(DATAMES AS DATE) BETWEEN ? AND ?
             AND vw02310.TB02278_SITUACAO = 'I'";
-            
+
         $ocultarBen = "table-cell"; // Exibe coluna de valor beneficio
         break;
 }
@@ -263,9 +263,9 @@ if ($stmtCliente === false) {
                 <tfoot>
                     <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
                         <th colspan="12" style="text-align: right;">Totais:</th>
-                        <th><?= formatarMoeda($totalBeneficio) ?></th>
-                        <th><?= formatarMoeda($totalUtilzado) ?></th>
-                        <th><?= formatarMoeda($totalRest) ?></th>
+                        <th style="display: <?= $ocultarBen ?>;"><?= formatarMoeda($totalBeneficio) ?></th>
+                        <th style="display: <?= $ocultarUtil ?>;"><?= formatarMoeda($totalUtilzado) ?></th>
+                        <th style="display: <?= $ocultarRest ?>;"><?= formatarMoeda($totalRest) ?></th>
                         <th></th>
                         <th></th>
                         <th></th>
