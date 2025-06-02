@@ -88,7 +88,7 @@ switch ($tipoValor) {
         LEFT JOIN TB01074 ON TB01074_CODIGO = TB02278_CLASSIFICACAO
         LEFT JOIN TB02091 ON TB02091_NTFISC = NTFISC AND TB02091_CODEMP = CODEMP
 
-        WHERE CODCLI = ?
+        WHERE TB01107_CODIGO = ?
         AND CAST(TB02091_DATA AS DATE) BETWEEN ? AND ?";
 
         $ocultarUtil = "table-cell"; // Exibe coluna de valor utilizado
@@ -123,9 +123,9 @@ switch ($tipoValor) {
             LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021_NTFISC
 
             WHERE vw02310.TB02278_CODCLI = ?
-            AND CAST(DATAMES AS DATE) BETWEEN ? AND ?
+            AND CONVERT(date, '01/' + vw02310.TB02278_MES, 103) BETWEEN ? AND ?
             AND vw02310.TB02278_SITUACAO = 'I'";
-            
+
         $ocultarBen = "table-cell"; // Exibe coluna de valor beneficio
         break;
 }
@@ -151,7 +151,7 @@ if ($stmtCliente === false) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../public/CSS/detal.css">
-    <title>TINSEI</title>
+    <title>DATABIT</title>
 </head>
 
 <body>
@@ -263,9 +263,9 @@ if ($stmtCliente === false) {
                 <tfoot>
                     <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
                         <th colspan="12" style="text-align: right;">Totais:</th>
-                        <th><?= formatarMoeda($totalBeneficio) ?></th>
-                        <th><?= formatarMoeda($totalUtilzado) ?></th>
-                        <th><?= formatarMoeda($totalRest) ?></th>
+                        <th style="display: <?= $ocultarBen ?>;"><?= formatarMoeda($totalBeneficio) ?></th>
+                        <th style="display: <?= $ocultarUtil ?>;"><?= formatarMoeda($totalUtilzado) ?></th>
+                        <th style="display: <?= $ocultarRest ?>;"><?= formatarMoeda($totalRest) ?></th>
                         <th></th>
                         <th></th>
                         <th></th>

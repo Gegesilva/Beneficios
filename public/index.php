@@ -121,8 +121,8 @@ if (!isset($DataFim)) {
                                   vw02310.TB02278_CODCLI AS CODCLI,
                                   TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
                                   A.TB01008_NOME AS CLIENTE,
-                                  CAST(ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA) AS DATE) AS DATA,
-                                  SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO
+                                  SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO,
+								                  CONVERT(date, '01/' + vw02310.TB02278_MES, 103) DATA
                               FROM VW02310
                               LEFT JOIN TB02278 AS B ON B.TB02278_CODIGO = vw02310.TB02278_CODIGO
                               LEFT JOIN TB01008 AS A ON TB01008_CODIGO = vw02310.TB02278_CODCLI
@@ -130,7 +130,7 @@ if (!isset($DataFim)) {
                               LEFT JOIN TB02021 ON TB02021_CODIGO = vw02310.TB02278_NUMVENDA
                               LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021.TB02021_NTFISC
                               WHERE vw02310.TB02278_SITUACAO = 'I'
-                              GROUP BY vw02310.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, ISNULL(TB02091_DATANOTA, vw02310.TB02278_DATA)
+                              GROUP BY vw02310.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, vw02310.TB02278_MES
                           )
 
                           SELECT 
@@ -142,12 +142,15 @@ if (!isset($DataFim)) {
                               ISNULL(c.VALOR_CONCEDIDO, 0) AS VALOR_CONCEDIDO,
                               ISNULL(u.VALOR_UTILIZADO, 0) AS VALOR_UTILIZADO,
                               ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_EXPIRADO,
-                              0 + ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_FINAL
+                              0 + ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_FINAL,
+                              TB01107_CODIGO CODGRUPO
                           FROM Concedido c
                           FULL JOIN Utilizado u  ON c.CODCLI = u.CODCLI AND c.GRUPO_ECONOMICO = u.GRUPO_ECONOMICO AND c.DATA = u.DATA
                           FULL JOIN Expirado e ON COALESCE(c.CODCLI, u.CODCLI) = e.CODCLI 
                               AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
                               AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
+                          LEFT JOIN TB01008 AS A ON TB01008_CODIGO = COALESCE(c.CODCLI, u.CODCLI, e.CODCLI)
+                          LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
 
                           WHERE COALESCE(c.DATA, e.DATA, u.DATA) BETWEEN '$DataIni' AND '$DataFim'
                   ";
@@ -171,6 +174,7 @@ if (!isset($DataFim)) {
                 $agrupados[$chave] = [
                     'CLIENTE' => $row['CLIENTE'],
                     'GRUPO_ECONOMICO' => $row['GRUPO_ECONOMICO'],
+                    'COD_GRUPO' => $row['CODGRUPO'],
                     'CODCLI' => $row['CODCLI'],
                     'VALOR_INICIAL' => 0,
                     'VALOR_CONCEDIDO' => 0,
@@ -185,6 +189,7 @@ if (!isset($DataFim)) {
             $agrupados[$chave]['VALOR_UTILIZADO'] += (float) $row['VALOR_UTILIZADO'];
             $agrupados[$chave]['VALOR_EXPIRADO']  += (float) $row['VALOR_EXPIRADO'];
             $agrupados[$chave]['VALOR_FINAL']     += (float) $row['VALOR_FINAL'];
+            $agrupados[$chave]['CODGRUPO']     += (float) $row['COD_GRUPO'];
         }
         
         // Monta a tabela HTML
@@ -196,17 +201,24 @@ if (!isset($DataFim)) {
             $valorUtilizado = $row['VALOR_UTILIZADO'];
             $valorExpirado  = $row['VALOR_EXPIRADO'];
             $valorfinal     = $row['VALOR_FINAL'];
+
+            $totalValorInicial += $valorInicial;
+            $totalValorConcedido += $valorConcedido;
+            $totalValorUtlizado += $valorUtilizado;
+            $totalValorExpirado += $valorExpirado;
+            $totalValorFinal += $valorfinal;
         
             $cliente        = htmlspecialchars($row['CLIENTE']);
             $grupoEconomico = htmlspecialchars($row['GRUPO_ECONOMICO']);
             $codCli         = htmlspecialchars($row['CODCLI'], ENT_QUOTES);
+            $codGrupo       = htmlspecialchars($row['COD_GRUPO'], ENT_QUOTES);
         
             $tabela .= "<tr class='linha-click2'>";
             $tabela .= "<td>{$cliente}</td>";
             $tabela .= "<td>{$grupoEconomico}</td>";
             $tabela .= "<td>" . formatarMoeda($valorInicial) . "</td>";
             $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'C')\">" . formatarMoeda($valorConcedido) . "</td>";
-            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'U')\">" . formatarMoeda($valorUtilizado) . "</td>";
+            $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codGrupo}', '{$DataIni}', '{$DataFim}', 'U')\">" . formatarMoeda($valorUtilizado) . "</td>";
             $tabela .= "<td class='linha-click' style='cursor:pointer' onclick=\"enviarDetalhes('{$codCli}', '{$DataIni}', '{$DataFim}', 'E')\">" . formatarMoeda($valorExpirado) . "</td>";
             $tabela .= "<td>" . formatarMoeda($valorfinal) . "</td>";
             $tabela .= "<td></td>";
@@ -217,14 +229,16 @@ if (!isset($DataFim)) {
           ?>
 
         </tbody>
-        <!-- <tfoot>
+        <tfoot>
           <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
-            <th colspan="8" style="text-align: right;">Totais:</th>
-            <th></th>
-            <th></th>
-            <th></th>
+            <th colspan="2" style="text-align: right;">Totais:</th>
+            <th><?= formatarMoeda($totalValorInicial) ?></th>
+            <th><?= formatarMoeda($totalValorConcedido) ?></th>
+            <th><?= formatarMoeda($totalValorUtlizado) ?></th>
+            <th><?= formatarMoeda($totalValorExpirado) ?></th>
+            <th><?= formatarMoeda($totalValorFinal) ?></th>
           </tr>
-        </tfoot> -->
+        </tfoot>
       </table>
     </div>
   </div>
