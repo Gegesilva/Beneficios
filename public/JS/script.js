@@ -181,7 +181,7 @@
 
     const valorSelecionado = clienteSelect.value;
 
-    clienteSelect.innerHTML = '<option value="">Todos</option>';
+    clienteSelect.innerHTML = '<option value="">-- Clientes --</option>';
     Array.from(clientesVisiveis).sort().forEach(cliente => {
       const option = document.createElement('option');
       option.value = cliente;
