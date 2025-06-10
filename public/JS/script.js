@@ -174,7 +174,7 @@
 
     linhas.forEach(linha => {
       if (linha.style.display !== 'none') {
-        const cliente = linha.cells[1].textContent.trim();
+        const cliente = linha.cells[0].textContent.trim();
         clientesVisiveis.add(cliente);
       }
     });

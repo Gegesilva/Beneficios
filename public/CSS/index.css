@@ -13,61 +13,64 @@ body {
   align-items: center;
   justify-content: space-between;
   background-color: #fff;
-  padding: 20px;
+  padding: 20px 40px;
+  /* espaço lateral extra */
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  /* permite quebra de linha em telas menores */
+  gap: 10px;
 }
 
-.header label{
+.header label {
   font-size: 20px;
   color: #2b669c;
 }
 
-.filtro{
+.filtro {
   border-radius: 15px;
-  border: 0.5px;
-  padding: 10px;
+  border: 0.5px solid #ccc;
+  padding: 5px;
   background-color: rgb(225, 223, 223);
   font-size: 15px;
   margin-right: 5px;
 }
 
-.filtroCliente{
+.filtroCliente {
   border-radius: 15px;
-  border: 0.5px;
-  padding: 10px;
+  border: 0.5px solid #ccc;
+  padding: 5px;
   background-color: rgb(225, 223, 223);
   font-size: 15px;
   width: 200px;
 }
 
-.filtro:hover{
-  background-color: rgb(255, 255, 255);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-} 
-
-.filtroCliente:hover{
+.filtro:hover,
+.filtroCliente:hover {
   background-color: rgb(255, 255, 255);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-img{
+img {
   height: 28px;
-  width: 50,2px;
+  width: 50.2px;
+  /* corrigido de vírgula para ponto */
   flex: 0 0 auto;
 }
 
 .titulo {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   font-size: 1.5rem;
   font-weight: bold;
   white-space: nowrap;
-  pointer-events: none; /* impede que ele atrapalhe clique nos outros */
+  text-align: center;
   color: #2b669c;
+  pointer-events: none;
 }
+
 
 .month-grid {
   display: grid;
@@ -113,6 +116,7 @@ th {
   background-color: #c8e6c9;
   z-index: 1;
 }
+
 .titulo-col-tab {
   cursor: pointer;
 }
@@ -190,23 +194,28 @@ th {
     width: 24px;
     height: 24px;
   }
+
   .titulo {
     font-size: 1rem;
   }
+
   .btn-xls-detal {
     width: 24px;
     height: 24px;
   }
+
   .filtro {
     width: 5rem;
     margin-bottom: 10px;
     padding: 8px;
   }
+
   .filtroCliente {
     width: 5rem;
     margin-bottom: 10px;
     padding: 8px;
   }
+
   .filtro:hover {
     background-color: rgb(255, 255, 255);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -217,7 +226,7 @@ th {
   }
 }
 
-.linha-click{
+.linha-click {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -226,16 +235,16 @@ th {
   border-radius: 10px;
 }
 
-.linha-click:hover{
+.linha-click:hover {
   transform: scale(1.1) translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-weight: bold;
   color: red;
 }
 
-.linha-click2:hover{
+.linha-click2:hover {
   transform: scale(1.0) translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-weight: bold;
   color: rgb(31, 1, 1);
 }

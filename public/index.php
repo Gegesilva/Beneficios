@@ -39,28 +39,28 @@ if (!isset($DataFim)) {
     <div class="logo">
       <img src="img/logo.jpg" alt="logo">
     </div>
-
-    <div class="titulo">
-      Benefícios - Data base
+    <div class="header-topo">
+      <div class="titulo">Benefícios - Data base</div>
     </div>
+
 
     <div class="filtros">
       <form method="POST">
-        <label for="year">Data: </label>
+        <!-- <label for="year">Data: </label> -->
         <input type="date" class="filtro" min="<?= date('Y') . '-01-01' ?>" name="DataFim" onchange="this.form.submit()"
           value="<?= htmlspecialchars($DataFim) ?>">
 
-        <label for="filtroBeneficio">Beneficios: </label>
+        <!-- <label for="filtroBeneficio">Beneficios: </label> -->
         <select id="filtroBeneficio" class="filtroCliente" onchange="filtrarPorBeneficio()">
-          <option value="">-- Todos os beneficios --</option>
-        </select>  
-        <label for="filtroCliente">Cliente: </label>
+          <option value="">-- Beneficios --</option>
+        </select>
+        <!-- <label for="filtroCliente">Cliente: </label> -->
         <select id="filtroCliente" class="filtroCliente" onchange="filtrarPorCliente()">
-          <option value="">-- Todos os clientes --</option>
+          <option value="">-- Clientes --</option>
         </select>
       </form>
     </div>
-    
+
   </div>
 
   </div>
@@ -74,7 +74,8 @@ if (!isset($DataFim)) {
             </th>
             <th class="titulo-col-tab" onclick="ordenarTabela(1)">Grupo <i class="fa fa-sort" aria-hidden="true"></i>
             </th>
-            <th class="titulo-col-tab" onclick="ordenarTabela(2)">Tipo Benefício <i class="fa fa-sort" aria-hidden="true"></i>
+            <th class="titulo-col-tab" onclick="ordenarTabela(2)">Tipo Benefício <i class="fa fa-sort"
+                aria-hidden="true"></i>
             </th>
             <th class="titulo-col-tab" onclick="ordenarTabela(3)">Valor Inicial <i class="fa fa-sort"
                 aria-hidden="true"></i></th>
@@ -178,53 +179,53 @@ if (!isset($DataFim)) {
           $tabela = "";
 
           while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $chave = $row['CLIENTE']/*  . '|' . $row['GRUPO_ECONOMICO'] */;
-        
+            $chave = $row['CLIENTE']/*  . '|' . $row['GRUPO_ECONOMICO'] */ ;
+
             if (!isset($agrupados[$chave])) {
-                $agrupados[$chave] = [
-                    'CLIENTE' => $row['CLIENTE'],
-                    'GRUPO_ECONOMICO' => $row['GRUPO_ECONOMICO'],
-                    'TIPO_BENEFICIO' => $row['TIPO_BENEFICIO'],
-                    'COD_GRUPO' => $row['CODGRUPO'],
-                    'CODCLI' => $row['CODCLI'],
-                    'VALOR_INICIAL' => 0,
-                    'VALOR_CONCEDIDO' => 0,
-                    'VALOR_UTILIZADO' => 0,
-                    'VALOR_EXPIRADO' => 0,
-                    'VALOR_FINAL' => 0,
-                ];
+              $agrupados[$chave] = [
+                'CLIENTE' => $row['CLIENTE'],
+                'GRUPO_ECONOMICO' => $row['GRUPO_ECONOMICO'],
+                'TIPO_BENEFICIO' => $row['TIPO_BENEFICIO'],
+                'COD_GRUPO' => $row['CODGRUPO'],
+                'CODCLI' => $row['CODCLI'],
+                'VALOR_INICIAL' => 0,
+                'VALOR_CONCEDIDO' => 0,
+                'VALOR_UTILIZADO' => 0,
+                'VALOR_EXPIRADO' => 0,
+                'VALOR_FINAL' => 0,
+              ];
             }
-        
-            $agrupados[$chave]['VALOR_INICIAL']   += (float) $row['VALOR_INICIAL'];
+
+            $agrupados[$chave]['VALOR_INICIAL'] += (float) $row['VALOR_INICIAL'];
             $agrupados[$chave]['VALOR_CONCEDIDO'] += (float) $row['VALOR_CONCEDIDO'];
             $agrupados[$chave]['VALOR_UTILIZADO'] += (float) $row['VALOR_UTILIZADO'];
-            $agrupados[$chave]['VALOR_EXPIRADO']  += (float) $row['VALOR_EXPIRADO'];
-            $agrupados[$chave]['VALOR_FINAL']     += (float) $row['VALOR_FINAL'];
-            $agrupados[$chave]['CODGRUPO']     += (float) $row['COD_GRUPO'];
-        }
-        
-        // Monta a tabela HTML
-        $tabela = "";
-        
-        foreach ($agrupados as $row) {
-            $valorInicial   = $row['VALOR_INICIAL'];
+            $agrupados[$chave]['VALOR_EXPIRADO'] += (float) $row['VALOR_EXPIRADO'];
+            $agrupados[$chave]['VALOR_FINAL'] += (float) $row['VALOR_FINAL'];
+            $agrupados[$chave]['CODGRUPO'] += (float) $row['COD_GRUPO'];
+          }
+
+          // Monta a tabela HTML
+          $tabela = "";
+
+          foreach ($agrupados as $row) {
+            $valorInicial = $row['VALOR_INICIAL'];
             $valorConcedido = $row['VALOR_CONCEDIDO'];
             $valorUtilizado = $row['VALOR_UTILIZADO'];
-            $valorExpirado  = $row['VALOR_EXPIRADO'];
-            $valorfinal     = $row['VALOR_FINAL'];
+            $valorExpirado = $row['VALOR_EXPIRADO'];
+            $valorfinal = $row['VALOR_FINAL'];
 
             $totalValorInicial += $valorInicial;
             $totalValorConcedido += $valorConcedido;
             $totalValorUtlizado += $valorUtilizado;
             $totalValorExpirado += $valorExpirado;
             $totalValorFinal += $valorfinal;
-        
-            $cliente        = htmlspecialchars($row['CLIENTE']); 
+
+            $cliente = htmlspecialchars($row['CLIENTE']);
             $grupoEconomico = htmlspecialchars($row['GRUPO_ECONOMICO']);
-            $tipoBeneficio  = htmlspecialchars($row['TIPO_BENEFICIO']);
-            $codCli         = htmlspecialchars($row['CODCLI'], ENT_QUOTES);
-            $codGrupo       = htmlspecialchars($row['COD_GRUPO'], ENT_QUOTES);
-        
+            $tipoBeneficio = htmlspecialchars($row['TIPO_BENEFICIO']);
+            $codCli = htmlspecialchars($row['CODCLI'], ENT_QUOTES);
+            $codGrupo = htmlspecialchars($row['COD_GRUPO'], ENT_QUOTES);
+
             $tabela .= "<tr class='linha-click2'>";
             $tabela .= "<td>{$cliente}</td>";
             $tabela .= "<td>{$grupoEconomico}</td>";
@@ -236,9 +237,9 @@ if (!isset($DataFim)) {
             $tabela .= "<td>" . formatarMoeda($valorfinal) . "</td>";
             $tabela .= "<td></td>";
             $tabela .= "</tr>";
-        }
-        
-        echo $tabela;
+          }
+
+          echo $tabela;
           ?>
 
         </tbody>
