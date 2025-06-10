@@ -3,7 +3,7 @@
 
 $server = 'localhost';
 $base = 'TINSEI';
-$usuarioBanco = 'SA';
+$usuarioBanco = 'sa';
 $SenhaBanco = 'databit@2022';
 
 

@@ -223,3 +223,65 @@
   function voltar() {
     history.back();
   }
+
+
+
+
+
+  
+  // Preenche a lista de beneficios dinamicamente
+  document.addEventListener('DOMContentLoaded', () => {
+    const selectBen = document.getElementById('filtroBeneficio');
+    const linhasBen = document.querySelectorAll('.linha-click2');
+    const clientes = new Set();
+
+    linhasBen.forEach(linha => {
+      const nome = linha.cells[2].textContent.trim();
+      clientes.add(nome);
+    });
+
+    Array.from(clientes).sort().forEach(nome => {
+      const option = document.createElement('option');
+      option.value = nome;
+      option.textContent = nome;
+      selectBen.appendChild(option);
+    });
+  });
+
+  // Filtra as linhas com base no cliente selecionado
+  function filtrarPorBeneficio() {
+    const filtro = document.getElementById('filtroBeneficio').value;
+    const linhasBen = document.querySelectorAll('.linha-click2');
+
+    linhasBen.forEach(linha => {
+      const nome = linha.cells[2].textContent.trim();
+      linha.style.display = (!filtro || nome === filtro) ? '' : 'none';
+    });
+  }
+
+
+  function salvarFiltro() {
+    const filtro = {
+      nome: document.getElementById('filtroBeneficio').value,
+    };
+  
+    localStorage.setItem('filtroBeneficio', JSON.stringify(filtro)); 
+  }
+  
+  function carregarFiltro() {
+    const filtroSalvo = localStorage.getItem('filtroBeneficio'); 
+    if (filtroSalvo) {
+      const filtro = JSON.parse(filtroSalvo);
+      document.getElementById('filtroBeneficio').value = filtro.nome;
+
+      filtrarPorCliente(); // Aplica o filtro ao carregar a página
+    }
+  
+  }
+
+  
+  // Carrega o filtro ao carregar a página
+  carregarFiltro();
+  
+  // Adiciona um evento para salvar o filtro
+  document.getElementById('filtroBeneficio').addEventListener('change', salvarFiltro);
