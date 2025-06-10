@@ -50,12 +50,13 @@ if (!isset($DataFim)) {
         <input type="date" class="filtro" min="<?= date('Y') . '-01-01' ?>" name="DataFim" onchange="this.form.submit()"
           value="<?= htmlspecialchars($DataFim) ?>">
 
+        <label for="filtroCliente">Beneficios: </label>
+        <select id="filtroBeneficio" class="filtroCliente" onchange="filtrarPorBeneficio()">
+          <option value="">-- Todos os beneficios --</option>
+        </select>  
         <label for="filtroCliente">Cliente: </label>
         <select id="filtroCliente" class="filtroCliente" onchange="filtrarPorCliente()">
           <option value="">-- Todos os clientes --</option>
-        </select>
-        <select id="filtroBeneficio" class="filtroCliente" onchange="filtrarPorBeneficio()">
-          <option value="">-- Todos os beneficios --</option>
         </select>
       </form>
     </div>

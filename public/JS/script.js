@@ -6,7 +6,7 @@
     document.getElementById('detalForm').submit();
   }
 
- 
+
 
 
   /* Grafico */
@@ -107,36 +107,36 @@
     const table = document.querySelector("table");
     const tbody = table.tBodies[0];
     const rows = Array.from(tbody.querySelectorAll("tr"));
-  
+
     const asc = !table.dataset.sortAsc || table.dataset.sortAsc === "false";
     table.dataset.sortAsc = asc;
-  
+
     rows.sort((a, b) => {
       const cellA = a.children[colIndex].innerText.trim();
       const cellB = b.children[colIndex].innerText.trim();
-  
+
       // Remove "R$", espaços e pontos dos milhares, substitui vírgula por ponto
       const normalize = str =>
         parseFloat(
           str.replace(/R\$\s?/g, "") // remove R$ e espaço
-             .replace(/\./g, "")     // remove pontos dos milhares
-             .replace(",", ".")      // troca vírgula decimal por ponto
+          .replace(/\./g, "") // remove pontos dos milhares
+          .replace(",", ".") // troca vírgula decimal por ponto
         );
-  
+
       const numA = normalize(cellA);
       const numB = normalize(cellB);
-  
+
       if (!isNaN(numA) && !isNaN(numB)) {
         return asc ? numA - numB : numB - numA;
       }
-  
+
       return asc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
     });
-  
+
     tbody.innerHTML = "";
     rows.forEach(row => tbody.appendChild(row));
   }
-  
+
 
 
   //exportar xls
@@ -158,6 +158,9 @@
 
   }
 
+  function voltar() {
+    history.back();
+  }
 
 
 
@@ -197,38 +200,33 @@
     const filtro = {
       nome: document.getElementById('filtroCliente').value,
     };
-  
-    localStorage.setItem('filtroCliente', JSON.stringify(filtro)); 
+
+    localStorage.setItem('filtroCliente', JSON.stringify(filtro));
   }
-  
+
   function carregarFiltro() {
-    const filtroSalvo = localStorage.getItem('filtroCliente'); 
+    const filtroSalvo = localStorage.getItem('filtroCliente');
     if (filtroSalvo) {
       const filtro = JSON.parse(filtroSalvo);
       document.getElementById('filtroCliente').value = filtro.nome;
 
       filtrarPorCliente(); // Aplica o filtro ao carregar a página
     }
-  
+
   }
 
-  
+
   // Carrega o filtro ao carregar a página
   carregarFiltro();
-  
+
   // Adiciona um evento para salvar o filtro
   document.getElementById('filtroCliente').addEventListener('change', salvarFiltro);
-  
-
-  function voltar() {
-    history.back();
-  }
 
 
 
 
 
-  
+
   // Preenche a lista de beneficios dinamicamente
   document.addEventListener('DOMContentLoaded', () => {
     const selectBen = document.getElementById('filtroBeneficio');
@@ -257,31 +255,63 @@
       const nome = linha.cells[2].textContent.trim();
       linha.style.display = (!filtro || nome === filtro) ? '' : 'none';
     });
+    atualizarFiltroCliente();
   }
 
 
+  // Atualiza a lista de clientes no filtro quando as linhas são filtradas
+  function atualizarFiltroCliente() {
+    const clienteSelect = document.getElementById('filtroCliente');
+    const linhas = document.querySelectorAll('.linha-click2');
+
+    const clientesVisiveis = new Set();
+
+    linhas.forEach(linha => {
+      if (linha.style.display !== 'none') {
+        const cliente = linha.cells[1].textContent.trim();
+        clientesVisiveis.add(cliente);
+      }
+    });
+
+    const valorSelecionado = clienteSelect.value;
+
+    clienteSelect.innerHTML = '<option value="">Todos</option>';
+    Array.from(clientesVisiveis).sort().forEach(cliente => {
+      const option = document.createElement('option');
+      option.value = cliente;
+      option.textContent = cliente;
+      clienteSelect.appendChild(option);
+    });
+
+    // Se o cliente selecionado anteriormente ainda existir, manter selecionado
+    if (clientesVisiveis.has(valorSelecionado)) {
+      clienteSelect.value = valorSelecionado;
+    }
+  }
+
+  // Adiciona um evento para filtrar por beneficio
   function salvarFiltro() {
     const filtro = {
       nome: document.getElementById('filtroBeneficio').value,
     };
-  
-    localStorage.setItem('filtroBeneficio', JSON.stringify(filtro)); 
+
+    localStorage.setItem('filtroBeneficio', JSON.stringify(filtro));
   }
-  
+
   function carregarFiltro() {
-    const filtroSalvo = localStorage.getItem('filtroBeneficio'); 
+    const filtroSalvo = localStorage.getItem('filtroBeneficio');
     if (filtroSalvo) {
       const filtro = JSON.parse(filtroSalvo);
       document.getElementById('filtroBeneficio').value = filtro.nome;
 
       filtrarPorCliente(); // Aplica o filtro ao carregar a página
     }
-  
+
   }
 
-  
+
   // Carrega o filtro ao carregar a página
   carregarFiltro();
-  
+
   // Adiciona um evento para salvar o filtro
   document.getElementById('filtroBeneficio').addEventListener('change', salvarFiltro);
