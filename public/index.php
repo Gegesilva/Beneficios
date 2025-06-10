@@ -50,7 +50,7 @@ if (!isset($DataFim)) {
         <input type="date" class="filtro" min="<?= date('Y') . '-01-01' ?>" name="DataFim" onchange="this.form.submit()"
           value="<?= htmlspecialchars($DataFim) ?>">
 
-        <label for="filtroCliente">Beneficios: </label>
+        <label for="filtroBeneficio">Beneficios: </label>
         <select id="filtroBeneficio" class="filtroCliente" onchange="filtrarPorBeneficio()">
           <option value="">-- Todos os beneficios --</option>
         </select>  
@@ -256,7 +256,6 @@ if (!isset($DataFim)) {
     </div>
   </div>
   <script src="JS/script.js" charset="utf-8"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <form id="detalForm" method="post" action="../app/views/detal.php" style="display: none;">
     <input type="hidden" name="cliente" id="cliente">

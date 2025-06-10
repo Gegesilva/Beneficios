@@ -158,7 +158,11 @@ if ($stmtCliente === false) {
     <div class="month-grid">
         <!-- Exemplo de um mês (repita para os outros) -->
         <div class="month-card">
-            <div class="month-title"> Cliente: <?= $clienteNome ?> </div>
+            <div class="month-title"> Cliente: <?= $clienteNome ?>
+                <select id="filtroBeneficio" class="filtroBeneficio" onchange="filtrarPorBeneficio()">
+                    <option value="">-- Todos os beneficios --</option>
+                </select>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -235,7 +239,7 @@ if ($stmtCliente === false) {
                         $totalRest += $vlrRest;
                         $totalUtilzado += $vlrUtilizado;
 
-                        $tabela .= "<tr>";
+                        $tabela .= "<tr class='linha'>";
                         $tabela .= "<td>$row[CODIGO]</td>";
                         $tabela .= "<td>$row[SITUACAO]</td>";
                         $tabela .= "<td>$row[CODIGO_INTERNO]</td>";
@@ -274,7 +278,7 @@ if ($stmtCliente === false) {
             </table>
         </div>
     </div>
-    <script src="../../public/JS/script.js" charset="utf-8"></script>
+    <script src="../../public/JS/detal.js" charset="utf-8"></script>
 </body>
 
 </html>

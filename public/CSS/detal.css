@@ -16,6 +16,23 @@ body {
   border-radius: 8px;
 }
 
+.filtroBeneficio{
+  border-radius: 15px;
+  border: 0.5px;
+  padding: 10px;
+  background-color: rgb(225, 223, 223);
+  font-size: 15px;
+  width: 200px;
+  float: right;
+  margin-bottom: 0.7rem;
+}
+
+
+.filtroBeneficio:hover{
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
 .month-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
