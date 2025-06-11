@@ -103,6 +103,8 @@
          const nome = linha.cells[7].textContent.trim();
          linha.style.display = (!filtro || nome === filtro) ? '' : 'none';
      });
+
+     atualizarTotais();
  }
 
 
@@ -130,3 +132,43 @@
 
  // Adiciona um evento para salvar o filtro
  document.getElementById('filtroBeneficio').addEventListener('change', salvarFiltro);
+
+
+
+ //somar valores
+ function formatarMoeda(valor) {
+     return valor.toLocaleString('pt-BR', {
+         style: 'currency',
+         currency: 'BRL'
+     });
+ }
+
+ function parseValor(texto) {
+     if (!texto) return 0;
+     return parseFloat(texto.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.')) || 0;
+ }
+
+ function atualizarTotais() {
+     const linhas = document.querySelectorAll("table tbody tr");
+     let totalBeneficio = 0;
+     let totalUtilizado = 0;
+     let totalRestante = 0;
+
+     linhas.forEach(linha => {
+         if (linha.style.display === "none") return;
+
+         const colunas = linha.querySelectorAll("td");
+         totalBeneficio += parseValor(colunas[12]?.textContent);
+         totalUtilizado += parseValor(colunas[13]?.textContent);
+         totalRestante  += parseValor(colunas[14]?.textContent);
+
+     });
+
+     const elBen = document.getElementById("totalBeneficio");
+     const elUtil = document.getElementById("totalUtilizado");
+     const elRest = document.getElementById("totalRestante");
+
+     if (elBen) elBen.textContent = formatarMoeda(totalBeneficio);
+     if (elUtil) elUtil.textContent = formatarMoeda(totalUtilizado);
+     if (elRest) elRest.textContent = formatarMoeda(totalRestante);
+ }

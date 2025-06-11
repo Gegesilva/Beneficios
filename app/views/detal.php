@@ -266,15 +266,16 @@ if ($stmtCliente === false) {
                 </tbody>
                 <tfoot>
                     <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
-                        <th colspan="12" style="text-align: right;">Totais:</th>
-                        <th style="display: <?= $ocultarBen ?>;"><?= formatarMoeda($totalBeneficio) ?></th>
-                        <th style="display: <?= $ocultarUtil ?>;"><?= formatarMoeda($totalUtilzado) ?></th>
-                        <th style="display: <?= $ocultarRest ?>;"><?= formatarMoeda($totalRest) ?></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
+                    <th colspan="12" style="text-align: right;">Totais:</th>
+                    <th id="totalBeneficio" style="display: <?= $ocultarBen ?>;"><?= formatarMoeda($totalBeneficio) ?></th>
+                    <th id="totalUtilizado" style="display: <?= $ocultarUtil ?>;"><?= formatarMoeda($totalUtilzado) ?></th>
+                    <th id="totalRestante" style="display: <?= $ocultarRest ?>;"><?= formatarMoeda($totalRest) ?></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
                     </tr>
                 </tfoot>
+
             </table>
         </div>
     </div>

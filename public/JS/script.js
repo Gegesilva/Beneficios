@@ -99,6 +99,8 @@
       const nome = linha.cells[0].textContent.trim();
       linha.style.display = (!filtro || nome === filtro) ? '' : 'none';
     });
+
+    atualizarTotais();
   }
 
 
@@ -162,6 +164,7 @@
       linha.style.display = (!filtro || nome === filtro) ? '' : 'none';
     });
     atualizarFiltroCliente();
+    atualizarTotais();
   }
 
 
@@ -221,3 +224,39 @@
 
   // Adiciona um evento para salvar o filtro
   document.getElementById('filtroBeneficio').addEventListener('change', salvarFiltro);
+
+
+//somar valores
+  function formatarMoeda(valor) {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+  
+  function parseValor(valorFormatado) {
+    if (!valorFormatado) return 0;
+    return parseFloat(valorFormatado.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.')) || 0;
+  }
+  
+  function atualizarTotais() {
+    const linhas = document.querySelectorAll("table tbody tr");
+  
+    let totalInicial = 0, totalConcedido = 0, totalUtilizado = 0, totalExpirado = 0, totalFinal = 0;
+  
+    linhas.forEach(linha => {
+      if (linha.style.display === "none") return; // ignora linhas filtradas
+  
+      const celulas = linha.querySelectorAll("td");
+  
+      totalInicial   += parseValor(celulas[3]?.textContent);
+      totalConcedido += parseValor(celulas[4]?.textContent);
+      totalUtilizado += parseValor(celulas[5]?.textContent);
+      totalExpirado  += parseValor(celulas[6]?.textContent);
+      totalFinal     += parseValor(celulas[7]?.textContent);
+    });
+  
+    document.getElementById("totalValorInicial").textContent = formatarMoeda(totalInicial);
+    document.getElementById("totalValorConcedido").textContent = formatarMoeda(totalConcedido);
+    document.getElementById("totalValorUtilizado").textContent = formatarMoeda(totalUtilizado);
+    document.getElementById("totalValorExpirado").textContent = formatarMoeda(totalExpirado);
+    document.getElementById("totalValorFinal").textContent = formatarMoeda(totalFinal);
+  }
+  

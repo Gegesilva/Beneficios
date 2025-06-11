@@ -246,11 +246,12 @@ if (!isset($DataFim)) {
         <tfoot>
           <tr style="font-size: 0.75rem; font-weight: normal; color: #555;">
             <th colspan="3" style="text-align: right;">Totais:</th>
-            <th><?= formatarMoeda($totalValorInicial) ?></th>
-            <th><?= formatarMoeda($totalValorConcedido) ?></th>
-            <th><?= formatarMoeda($totalValorUtlizado) ?></th>
-            <th><?= formatarMoeda($totalValorExpirado) ?></th>
-            <th><?= formatarMoeda($totalValorFinal) ?></th>
+            <th id="totalValorInicial"></th>
+            <th id="totalValorConcedido"></th>
+            <th id="totalValorUtilizado"></th>
+            <th id="totalValorExpirado"></th>
+            <th id="totalValorFinal"></th>
+            <th></th>
           </tr>
         </tfoot>
       </table>
