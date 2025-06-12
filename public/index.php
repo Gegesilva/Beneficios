@@ -10,12 +10,12 @@ ini_set('display_errors', '0'); // Garante que erros não sejam exibidos no nave
 $DataIni = $_POST['DataIni'];
 $DataFim = $_POST['DataFim'];
 
-if (!isset($DataFim)) {
-  $DataIni = date('2021-01-01');
+if (!isset($DataIni) || !isset($DataFim)) {
+  $DataIni = date('2025-01-01');
   $DataFim = date('Y-m-t');
 } else {
   if (empty($DataIni)) {
-    $DataIni = date('2021-01-01');
+    $DataIni = date('2025-01-01');
   }
   if (empty($DataFim)) {
     $DataFim = date('Y-m-t');
@@ -47,7 +47,10 @@ if (!isset($DataFim)) {
     <div class="filtros">
       <form method="POST">
         <!-- <label for="year">Data: </label> -->
-        <input type="date" class="filtro" min="<?= date('Y') . '-01-01' ?>" name="DataFim" onchange="this.form.submit()"
+        <input type="date" class="filtro" name="DataIni" onchange="this.form.submit()"
+          value="<?= htmlspecialchars($DataIni) ?>">
+
+        <input type="date" class="filtro" name="DataFim" onchange="this.form.submit()"
           value="<?= htmlspecialchars($DataFim) ?>">
 
         <!-- <label for="filtroBeneficio">Beneficios: </label> -->
@@ -94,76 +97,98 @@ if (!isset($DataFim)) {
           </tr>
         </thead>
         <?php
-        $sql = "WITH Concedido AS (
-                              SELECT 
-                                  TB02278_CODCLI AS CODCLI,
-                                  TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
-                                  A.TB01008_NOME AS CLIENTE,
-                                  CAST(TB02278_DATA AS DATE) AS DATA,
-                                  SUM(TB02278_VLRBENEF) AS VALOR_CONCEDIDO,
-								  TB01074_NOME Ben
-                              FROM VW02310
-                              LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278_CODCLI
-                              LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
-                              LEFT JOIN TB02021 ON TB02021_CODIGO = TB02278_NUMVENDA
-                              LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021_NTFISC AND TB02091_CODEMP = TB02021_CODEMP
-                              GROUP BY TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02278_DATA, TB01074_NOME
-                          ),
-                          Utilizado AS (
-                              SELECT 
-                                  TB02278.TB02278_CODCLI AS CODCLI,
-                                  TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
-                                  A.TB01008_NOME AS CLIENTE,
-                                  CAST(ISNULL(TB02091_DATA, TB02278_DTCAD) AS DATE) AS DATA,
-                                  SUM(VLRDESCBENEF) AS VALOR_UTILIZADO,
-								  TB01074_NOME Ben
-                              FROM VW02311
-                              LEFT JOIN TB02278 ON TB02278_CODIGO = BENEFICIO
-                              LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278.TB02278_CODCLI
-                              LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
-                              LEFT JOIN TB01074 ON TB01074_CODIGO = TB02278_CLASSIFICACAO
-                              LEFT JOIN TB02091 ON TB02091_NTFISC = NTFISC AND TB02091_CODEMP = CODEMP
-                              GROUP BY TB02278.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02091_DATA, TB02278_DTCAD, TB01074_NOME
-                          ),
-                          Expirado AS (
-                              SELECT 
-                                  vw02310.TB02278_CODCLI AS CODCLI,
-                                  TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
-                                  A.TB01008_NOME AS CLIENTE,
-                                  SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO,
-                                  CONVERT(date, '01/' + vw02310.TB02278_MES, 103) DATA,
-                                  TB01074_NOME Ben
-                              FROM VW02310
-                              LEFT JOIN TB02278 AS B ON B.TB02278_CODIGO = vw02310.TB02278_CODIGO
-                              LEFT JOIN TB01008 AS A ON TB01008_CODIGO = vw02310.TB02278_CODCLI
-                              LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
-                              LEFT JOIN TB02021 ON TB02021_CODIGO = vw02310.TB02278_NUMVENDA
-                              LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021.TB02021_NTFISC
-                              WHERE vw02310.TB02278_SITUACAO = 'I'
-                              GROUP BY vw02310.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, vw02310.TB02278_MES, TB01074_NOME
-                          )
-
+                 $sql = " WITH Concedido AS (
                           SELECT 
-                              COALESCE(c.CODCLI, u.CODCLI, e.CODCLI) AS CODCLI,
-                              COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO, e.GRUPO_ECONOMICO) AS GRUPO_ECONOMICO,
-                              COALESCE(c.CLIENTE, u.CLIENTE, e.CLIENTE) AS CLIENTE,
-                              COALESCE(c.DATA, u.DATA, e.DATA) AS DATA,
-                              0 AS VALOR_INICIAL, 
-                              ISNULL(c.VALOR_CONCEDIDO, 0) AS VALOR_CONCEDIDO,
-                              ISNULL(u.VALOR_UTILIZADO, 0) AS VALOR_UTILIZADO,
-                              ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_EXPIRADO,
-                              0 + ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_FINAL,
-                              TB01107_CODIGO CODGRUPO,
-							                COALESCE(c.Ben, u.Ben, e.Ben)  TIPO_BENEFICIO
-                          FROM Concedido c
-                          FULL JOIN Utilizado u  ON c.CODCLI = u.CODCLI AND c.GRUPO_ECONOMICO = u.GRUPO_ECONOMICO AND c.DATA = u.DATA
-                          FULL JOIN Expirado e ON COALESCE(c.CODCLI, u.CODCLI) = e.CODCLI 
-                              AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
-                              AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
-                          LEFT JOIN TB01008 AS A ON TB01008_CODIGO = COALESCE(c.CODCLI, u.CODCLI, e.CODCLI)
+                              TB02278_CODCLI AS CODCLI,
+                              TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
+                              A.TB01008_NOME AS CLIENTE,
+                              CAST(TB02278_DATA AS DATE) AS DATA,
+                              SUM(TB02278_VLRBENEF) AS VALOR_CONCEDIDO,
+                        TB01074_NOME Ben
+                          FROM VW02310
+                          LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278_CODCLI
                           LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                          LEFT JOIN TB02021 ON TB02021_CODIGO = TB02278_NUMVENDA
+                          LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021_NTFISC AND TB02091_CODEMP = TB02021_CODEMP
+                          GROUP BY TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02278_DATA, TB01074_NOME
+                      ),
+                      Utilizado AS (
+                          SELECT 
+                              TB02278.TB02278_CODCLI AS CODCLI,
+                              TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
+                              A.TB01008_NOME AS CLIENTE,
+                              CAST(ISNULL(TB02091_DATA, TB02278_DTCAD) AS DATE) AS DATA,
+                              SUM(VLRDESCBENEF) AS VALOR_UTILIZADO,
+                        TB01074_NOME Ben
+                          FROM VW02311
+                          LEFT JOIN TB02278 ON TB02278_CODIGO = BENEFICIO
+                          LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278.TB02278_CODCLI
+                          LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                          LEFT JOIN TB01074 ON TB01074_CODIGO = TB02278_CLASSIFICACAO
+                          LEFT JOIN TB02091 ON TB02091_NTFISC = NTFISC AND TB02091_CODEMP = CODEMP
+                          GROUP BY TB02278.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, TB02091_DATA, TB02278_DTCAD, TB01074_NOME
+                      ),
+                      Expirado AS (
+                          SELECT 
+                              vw02310.TB02278_CODCLI AS CODCLI,
+                              TB01107.TB01107_NOME AS GRUPO_ECONOMICO,
+                              A.TB01008_NOME AS CLIENTE,
+                              SUM(vw02310.TB02278_VLRREST) AS VALOR_EXPIRADO,
+                              CONVERT(date, '01/' + vw02310.TB02278_MES, 103) DATA,
+                              TB01074_NOME Ben
+                          FROM VW02310
+                          LEFT JOIN TB02278 AS B ON B.TB02278_CODIGO = vw02310.TB02278_CODIGO
+                          LEFT JOIN TB01008 AS A ON TB01008_CODIGO = vw02310.TB02278_CODCLI
+                          LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                          LEFT JOIN TB02021 ON TB02021_CODIGO = vw02310.TB02278_NUMVENDA
+                          LEFT JOIN TB02091 ON TB02091_NTFISC = TB02021.TB02021_NTFISC
+                          WHERE vw02310.TB02278_SITUACAO = 'I'
+                          GROUP BY vw02310.TB02278_CODCLI, TB01107.TB01107_NOME, A.TB01008_NOME, vw02310.TB02278_MES, TB01074_NOME
+                      ),
 
-                          WHERE COALESCE(c.DATA, e.DATA, u.DATA) BETWEEN '$DataIni' AND '$DataFim'
+                    SaldoAnterior AS (
+                        SELECT 
+                          COALESCE(c.CODCLI, u.CODCLI, e.CODCLI) AS CODCLI,
+                          COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO, e.GRUPO_ECONOMICO) AS GRUPO_ECONOMICO,
+                          COALESCE(c.Ben, u.Ben, e.Ben) AS TIPO_BENEFICIO,
+                          SUM(ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0)) AS VALOR_INICIAL
+                        FROM Concedido c
+                        FULL JOIN Utilizado u ON c.CODCLI = u.CODCLI AND c.GRUPO_ECONOMICO = u.GRUPO_ECONOMICO AND c.DATA = u.DATA
+                        FULL JOIN Expirado e ON COALESCE(c.CODCLI, u.CODCLI) = e.CODCLI 
+                          AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
+                          AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
+                        WHERE COALESCE(c.DATA, u.DATA, e.DATA) <= '$DataIni'
+                        GROUP BY 
+                          COALESCE(c.CODCLI, u.CODCLI, e.CODCLI),
+                          COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO, e.GRUPO_ECONOMICO),
+                          COALESCE(c.Ben, u.Ben, e.Ben)
+                      )
+
+
+                      SELECT 
+                          COALESCE(c.CODCLI, u.CODCLI, e.CODCLI) AS CODCLI,
+                          COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO, e.GRUPO_ECONOMICO) AS GRUPO_ECONOMICO,
+                          COALESCE(c.CLIENTE, u.CLIENTE, e.CLIENTE) AS CLIENTE,
+                          COALESCE(c.DATA, u.DATA, e.DATA) AS DATA,
+                          ISNULL(s.VALOR_INICIAL, 0) AS VALOR_INICIAL,
+                          ISNULL(c.VALOR_CONCEDIDO, 0) AS VALOR_CONCEDIDO,
+                          ISNULL(u.VALOR_UTILIZADO, 0) AS VALOR_UTILIZADO,
+                          ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_EXPIRADO,
+                          ISNULL(s.VALOR_INICIAL, 0) + ISNULL(c.VALOR_CONCEDIDO, 0) - ISNULL(u.VALOR_UTILIZADO, 0) - ISNULL(e.VALOR_EXPIRADO, 0) AS VALOR_FINAL,
+                          TB01107_CODIGO CODGRUPO,
+                      COALESCE(c.Ben, u.Ben, e.Ben)  TIPO_BENEFICIO
+                      FROM Concedido c
+                      FULL JOIN Utilizado u  ON c.CODCLI = u.CODCLI AND c.GRUPO_ECONOMICO = u.GRUPO_ECONOMICO AND c.DATA = u.DATA
+                      FULL JOIN Expirado e ON COALESCE(c.CODCLI, u.CODCLI) = e.CODCLI 
+                          AND COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO) = e.GRUPO_ECONOMICO 
+                          AND COALESCE(c.DATA, u.DATA, e.DATA) = e.DATA
+                      LEFT JOIN TB01008 AS A ON TB01008_CODIGO = COALESCE(c.CODCLI, u.CODCLI, e.CODCLI)
+                      LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                    LEFT JOIN SaldoAnterior s ON s.CODCLI = COALESCE(c.CODCLI, u.CODCLI, e.CODCLI)
+                      AND s.GRUPO_ECONOMICO = COALESCE(c.GRUPO_ECONOMICO, u.GRUPO_ECONOMICO, e.GRUPO_ECONOMICO)
+                      AND s.TIPO_BENEFICIO = COALESCE(c.Ben, u.Ben, e.Ben)
+
+                      WHERE COALESCE(c.DATA, e.DATA, u.DATA) BETWEEN '$DataIni' AND '$DataFim'
                   ";
 
         $stmt = sqlsrv_prepare($conn, $sql, []);
