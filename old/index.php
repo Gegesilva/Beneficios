@@ -181,7 +181,7 @@ if (!isset($DataFim)) {
           $tabela = "";
 
           while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $chave = $row['CLIENTE'] . '|' . $row['CODCLI'] ;
+            $chave = $row['CLIENTE']/*  . '|' . $row['GRUPO_ECONOMICO'] */ ;
 
             if (!isset($agrupados[$chave])) {
               $agrupados[$chave] = [
