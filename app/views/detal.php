@@ -49,19 +49,28 @@ switch ($tipoValor) {
         break;
     case $tipoValor == 'U':
         $sql = "SELECT 
-                    TITULO,
-                    TIPO,
-                    TB01007_NOME EMPRESA,
-                    FORMAT(DATA, 'dd/MM/yyyy') DATA,
-                    FORMAT(DATA_VENCIMENTO, 'dd/MM/yyyy') DATA_VENCIMENTO,
-                    NOTAFISCAL,
-                    VALOR
-                FROM SALDO_CLIENTES 
-                LEFT JOIN TB01007 ON TB01007_CODIGO = empresa
-                WHERE CODCLI = ?
-                AND DATA BETWEEN ? AND ?
-                $filtroEmp
-                AND TIPO = 'CR_Avulso'";
+                    tb02278_codigo as CODIGO,
+                    TB02278_SITUACAO AS SITUACAO,
+                    TB02278_CINTERNO AS CODIGO_INTERNO,
+                    TB02278_NUMVENDA as VENDA_ORIGEM_BENEFICIO,
+                    TB02021_NTFISC NUM_NOTA,
+                    FORMAT(TB02278_DATA, 'dd/MM/yyyy') AS DATA_BENEFICIO,
+                    TB01074_NOME AS TIPO_BENEFICIO,
+                    TB02278_CODCLI AS CODCLI,
+                    A.TB01008_NOME AS CLIENTE,
+                    TB02278_MES AS MES,
+                    FORMAT(TB02278_DTVALIDADE, 'dd/MM/yyy') AS VALIDADE,
+                    VLRDESCBENEF AS VALOR,
+                    TB02278_MARCANOME AS MARCA,
+                    TB01107_NOME AS GRUPO_ECONOMICO
+                FROM VW02311
+                LEFT JOIN TB02278 ON TB02278_CODIGO = BENEFICIO
+                LEFT JOIN TB01008 AS A ON TB01008_CODIGO = TB02278.TB02278_CODCLI
+                LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                LEFT JOIN TB01074 ON TB01074_CODIGO = TB02278_CLASSIFICACAO
+                LEFT JOIN TB02021 ON TB02021_CODIGO = VENDA  
+                WHERE venda is not null AND TB02278.TB02278_CODCLI = ?
+                AND CAST(TB02021_DATA AS DATE) BETWEEN ? AND ?";
         break;
     case $tipoValor == 'E':
         $sql = "SELECT 
