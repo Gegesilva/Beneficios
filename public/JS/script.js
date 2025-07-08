@@ -1,7 +1,8 @@
-  function enviarDetalhes(cliente, dataIni, dataFim, tipoValor) {
+  function enviarDetalhes(cliente, dataIni, dataFim, beneficio, tipoValor) {
     document.getElementById('cliente').value = cliente;
     document.getElementById('dataIni').value = dataIni;
     document.getElementById('dataFim').value = dataFim;
+    document.getElementById('beneficio').value = beneficio;
     document.getElementById('tipoValor').value = tipoValor;
     document.getElementById('detalForm').submit();
   }
@@ -57,7 +58,7 @@
 
     let a = document.createElement("a");
     a.href = url;
-    a.download = "Detalhamneto inadimplencia.xls";
+    a.download = "Beneficios.xls";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -231,9 +232,16 @@
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
   
-  function parseValor(valorFormatado) {
-    if (!valorFormatado) return 0;
-    return parseFloat(valorFormatado.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.')) || 0;
+  function parseValor(texto) {
+    if (!texto) return 0;
+  
+    // Remove tudo que não for número, vírgula, ponto ou sinal de menos
+    const limpo = texto.replace(/[^\d,-]/g, '')
+                       .replace(/\.(?=\d{3})/g, '') // remove pontos de milhar
+                       .replace(',', '.');
+  
+    const numero = parseFloat(limpo);
+    return isNaN(numero) ? 0 : numero;
   }
   
   function atualizarTotais() {

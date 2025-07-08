@@ -144,9 +144,16 @@
  }
 
  function parseValor(texto) {
-     if (!texto) return 0;
-     return parseFloat(texto.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.')) || 0;
- }
+    if (!texto) return 0;
+  
+    // Remove tudo que não for número, vírgula, ponto ou sinal de menos
+    const limpo = texto.replace(/[^\d,-]/g, '')
+                       .replace(/\.(?=\d{3})/g, '') // remove pontos de milhar
+                       .replace(',', '.');
+  
+    const numero = parseFloat(limpo);
+    return isNaN(numero) ? 0 : numero;
+  }
 
  function atualizarTotais() {
      const linhas = document.querySelectorAll("table tbody tr");
