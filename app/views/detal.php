@@ -73,20 +73,32 @@ switch ($tipoValor) {
                 AND CAST(TB02021_DATA AS DATE) BETWEEN ? AND ?";
         break;
     case $tipoValor == 'E':
-        $sql = "SELECT 
-                    TITULO,
-                    TIPO,
-                    TB01007_NOME EMPRESA,
-                    FORMAT(DATA, 'dd/MM/yyyy') DATA,
-                    FORMAT(DATA_VENCIMENTO, 'dd/MM/yyyy') DATA_VENCIMENTO,
-                    NOTAFISCAL,
-                    VALOR
-                FROM SALDO_CLIENTES 
-                LEFT JOIN TB01007 ON TB01007_CODIGO = empresa
-                WHERE CODCLI = ?
-                AND DATA BETWEEN ? AND ?
-                $filtroEmp
-                AND TIPO = 'ACRESCIMO'";
+        $sql = " SELECT 
+                    vw02310.TB02278_CODIGO CODIGO,
+                    vw02310.TB02278_SITUACAO SITUACAO,
+                    vw02310.TB02278_CINTERNO CODIGO_INTERNO,
+                    vw02310.TB02278_NUMVENDA as VENDA_ORIGEM_BENEFICIO,
+                    TB02021_NTFISC NUM_NOTA,
+                    FORMAT(DATAMES, 'dd/MM/yyyy') AS DATA_BENEFICIO,
+                    TB01074_NOME AS TIPO_BENEFICIO,
+                    vw02310.TB02278_NOME AS HISTORICO,
+                    A.TB01008_NOME AS CLIENTE,
+                    vw02310.TB02278_MES AS MES,
+                    FORMAT(vw02310.TB02278_DTVALIDADE, 'dd/MM/yyy') AS VALIDADE,
+                    vw02310.TB02278_VLRREST AS VALOR,
+                    vw02310.TB02278_MARCANOME AS MARCA,
+                    TB01107.TB01107_NOME AS GRUPO_ECONOMICO
+                    
+                FROM VW02310
+                LEFT JOIN TB02278 AS B ON B.TB02278_CODIGO = vw02310.TB02278_CODIGO
+                LEFT JOIN TB01008 AS A ON TB01008_CODIGO = vw02310.TB02278_CODCLI
+                LEFT JOIN TB02021 ON TB02021_CODIGO = B.TB02278_NUMVENDA
+                LEFT JOIN TB01107 ON TB01107_CODIGO = A.TB01008_GRUPO
+                WHERE vw02310.TB02278_SITUACAO = 'I'
+                AND vw02310.TB02278_CODCLI = ?
+                AND CAST(DATAMES AS DATE) BETWEEN ? AND ?
+                AND TB01074_NOME = ?
+                AND vw02310.TB02278_SITUACAO = 'I'";
         break;
 }
 
