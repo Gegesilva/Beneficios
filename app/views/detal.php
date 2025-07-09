@@ -46,6 +46,7 @@ switch ($tipoValor) {
                 AND CAST(TB02278_DATA AS DATE) BETWEEN ? AND ?
                 AND TB01074_NOME = ?
                 ";
+            $display = "";
         break;
     case $tipoValor == 'U':
         $sql = "SELECT 
@@ -71,6 +72,7 @@ switch ($tipoValor) {
                 LEFT JOIN TB02021 ON TB02021_CODIGO = VENDA  
                 WHERE venda is not null AND TB02278.TB02278_CODCLI = ?
                 AND CAST(TB02021_DATA AS DATE) BETWEEN ? AND ?";
+            $display = "";
         break;
     case $tipoValor == 'E':
         $sql = " SELECT 
@@ -99,6 +101,7 @@ switch ($tipoValor) {
                 AND CAST(DATAMES AS DATE) BETWEEN ? AND ?
                 AND TB01074_NOME = ?
                 AND vw02310.TB02278_SITUACAO = 'I'";
+            $display = "style='display: none;'";
         break;
 }
 
@@ -142,7 +145,7 @@ if ($stmtCliente === false) {
                                 aria-hidden="true"></i></th>
                         <th class="titulo-col-tab" onclick="ordenarTabela(3)">Origem beneficio <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
-                        <th class="titulo-col-tab" onclick="ordenarTabela(4)">Nota <i class="fa fa-sort"
+                        <th  class="titulo-col-tab" onclick="ordenarTabela(4)">Nota <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
                         <th class="titulo-col-tab" onclick="ordenarTabela(6)">Data Beneficio <i class="fa fa-sort"
                                 aria-hidden="true"></i></th>
